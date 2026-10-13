@@ -44,7 +44,7 @@ def run_preflight(site_id: str = None) -> bool:
             print(f"[FAIL] Failed to load site configuration for {sid}: {e}")
             return False
 
-        # Verify read-only guarantees
+        # Verify read-only guarantees and network default
         shadow_cfg = cfg.get("shadow", {})
         if shadow_cfg.get("production_write_allowed") is not False:
             print(f"[FAIL] CRITICAL: production_write_allowed is True for {sid}!")
@@ -52,9 +52,23 @@ def run_preflight(site_id: str = None) -> bool:
 
         ntes_cfg = cfg.get("ntes", {})
         if ntes_cfg.get("allow_network") is not False:
-            print(f"[FAIL] CRITICAL: ntes.allow_network is True for {sid}! Must be replay_only.")
+            print(f"[FAIL] CRITICAL: ntes.allow_network is True for {sid}! Must be False by default.")
             return False
-        print(f"[PASS] Zero-write & network-disabled constraints verified for {sid}")
+        print(f"[PASS] Zero-write & network-disabled (allow_network: false) constraints verified for {sid}")
+
+        # Check live-shadow readiness: verify ARDS NTES scraper availability
+        ards_ntes_script = repo_root / "ARDS-main" / "orchestrator" / "schedule" / "ntes_cache.py"
+        live_shadow_enabled = shadow_cfg.get("live_shadow", False)
+        print(f"[INFO] Site '{sid}' live_shadow mode: {'ENABLED' if live_shadow_enabled else 'DISABLED (default)'}")
+        if not ards_ntes_script.is_file():
+            if live_shadow_enabled:
+                print(f"[FAIL] CRITICAL: live_shadow is enabled for {sid}, but ARDS NTES scraper is missing at: {ards_ntes_script}")
+                return False
+            else:
+                print(f"[WARN] ARDS NTES scraper script not found at {ards_ntes_script}. Live-shadow mode cannot be started.")
+        else:
+            print(f"[PASS] Approved ARDS NTES scraper verified available at: {ards_ntes_script}")
+
 
         # Check schedule
         sched_cfg = cfg.get("schedule", {})

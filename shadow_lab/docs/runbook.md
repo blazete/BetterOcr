@@ -81,7 +81,26 @@ $PYTHON -m shadow_identity.cli compare --week-start 2026-10-12 --all-sites
 
 ---
 
-### 2.6 Running the Full Test Suite
+### 2.6 Delayed NTES Verification Worker Service
+Processes delayed NTES post-passage verification tasks. Crucially, the operational loop service invokes `process_due()` and only executes tasks whose scheduled verification time (+180s) has elapsed. It never uses `process_all_pending()` for live trials.
+
+```bash
+# Run continuous operational delayed NTES worker service (default poll interval: 5s)
+$PYTHON -m shadow_identity.cli run-delayed-worker --service --poll-interval 5.0
+
+# Process single specific passage ID
+$PYTHON -m shadow_identity.cli run-delayed-worker --passage-id PAS_20261013_001
+
+# Execute a one-time pass for all currently due tasks
+$PYTHON -m shadow_identity.cli run-delayed-worker
+```
+
+---
+
+### 2.7 Running the Full Test Suite
+Executes all 95 automated tests across unit, integration, isolation, and delayed bridge suites:
+
 ```bash
 $PYTHON -m pytest shadow_lab/tests/ -v
 ```
+

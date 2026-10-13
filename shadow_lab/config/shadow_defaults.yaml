@@ -12,6 +12,7 @@ shadow_defaults:
   ntes_post_offset_s: 180
   ntes_presence_window_min: 20
   allow_network_default: false
+  live_shadow: false
   enforce_production_read_only: true
   evidence_store_dir: "shadow_lab/workspace/evidence"
   reports_dir: "shadow_lab/workspace/reports"

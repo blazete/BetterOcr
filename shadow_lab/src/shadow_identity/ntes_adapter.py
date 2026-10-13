@@ -154,24 +154,35 @@ class ArdsNtesAdapter:
         ntes_cfg = site_cfg.get("ntes", {})
         allow_network = self.force_network or bool(ntes_cfg.get("allow_network", False))
         replay_dir = ntes_cfg.get("replay_dir")
+        shadow_cfg = site_cfg.get("shadow", {})
+        live_shadow = self.force_network or bool(shadow_cfg.get("live_shadow", False))
+
+        # Explicit refusal if live_shadow is requested but ARDS NTES scraper is missing (§2, §4, §5)
+        if live_shadow:
+            scraper_path = self.ards_root / "orchestrator" / "schedule" / "ntes_cache.py"
+            if not scraper_path.is_file():
+                raise RuntimeError(
+                    f"Live shadow requested for site '{site_id}', but approved ARDS NTES scraper is missing: "
+                    f"{scraper_path} not found! Refusing live-shadow execution."
+                )
 
         try:
-            cache = self._get_or_create_cache(site_id, mock_trains=mock_trains)
+            # Only instantiate and query ARDS NTES cache/scraper when mock, replay, or live_shadow is active
+            if mock_trains is not None or replay_dir or live_shadow:
+                cache = self._get_or_create_cache(site_id, mock_trains=mock_trains)
 
-            # Ensure cache is using this site's station and platforms (Site Isolation)
-            if hasattr(cache, "_station"):
-                expected_query = station_cfg.get("ntes_query") or station_code
-                if station_code not in cache._station:
-                    raise ConfigError(
-                        f"Site isolation violation: cache station '{cache._station}' "
-                        f"does not match site {site_id} ({station_code})!"
-                    )
+                # Ensure cache is using this site's station and platforms (Site Isolation)
+                if hasattr(cache, "_station"):
+                    expected_query = station_cfg.get("ntes_query") or station_code
+                    if station_code not in cache._station:
+                        raise ConfigError(
+                            f"Site isolation violation: cache station '{cache._station}' "
+                            f"does not match site {site_id} ({station_code})!"
+                        )
 
-            # If mock or replay or network allowed, fetch from NtesCache
-            if mock_trains is not None or replay_dir or allow_network:
                 ards_snap = cache.get_snapshot()
             else:
-                # In offline testing without network/replay, look for local snapshots under shadow_lab
+                # In offline testing without live_shadow/mock/replay, look for local snapshots under shadow_lab
                 local_snaps = sorted((self.snapshots_dir / site_id).glob("*.json"))
                 if local_snaps:
                     try:
@@ -193,6 +204,7 @@ class ArdsNtesAdapter:
                     except Exception:
                         pass
                 ards_snap = None
+
 
             if ards_snap is not None:
                 train_entries: List[NtesTrainEntry] = []

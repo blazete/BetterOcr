@@ -419,3 +419,79 @@ def test_worker_service_loop_only_processes_due_tasks(
     processed_count = worker.run_worker_loop(poll_interval_s=0.01, max_iterations=1)
     assert processed_count == 1
     assert worker._tasks[passage_id].status == "PROCESSED"
+
+
+def test_live_shadow_switch_disabled_by_default(shadow_lab_root):
+    """
+    Test: live_shadow switch is False by default across all registered sites,
+    and allow_network is strictly False.
+    """
+    registry = SiteRegistry(shadow_lab_root=shadow_lab_root)
+    for site_id in registry.list_sites():
+        cfg = registry.get_site(site_id)
+        assert cfg.get("shadow", {}).get("live_shadow", False) is False
+        assert cfg.get("ntes", {}).get("allow_network", False) is False
+
+
+def test_refuse_live_shadow_startup_when_ards_ntes_missing(shadow_lab_root, monkeypatch, tmp_path):
+    """
+    Test: System explicitly refuses startup if live-shadow is requested but ARDS NTES code is unavailable.
+    """
+    # 1. Test in SiteRegistry loading
+    fake_sites_dir = tmp_path / "sites" / "fake_live_site"
+    fake_sites_dir.mkdir(parents=True)
+    fake_site_yaml = fake_sites_dir / "site.yaml"
+    fake_site_yaml.write_text(
+        """
+site_id: fake_live_site
+installation_id: fake_01
+station:
+  code: FAKE
+  name: FAKE STATION
+  ntes_query: "FAKE - FAKE"
+  timezone: Asia/Kolkata
+platforms:
+  configured: ["1"]
+  observable_from_camera: true
+  possible_when_unknown: ["1"]
+schedule:
+  path: schedules/fake.csv
+  version: v1
+  effective_from: "2026-01-01"
+ntes:
+  mode: replay_only
+  ttl_s: 180
+  post_passage_offset_s: 180
+  allow_network: false
+shadow:
+  enabled: true
+  live_shadow: true
+  production_write_allowed: false
+"""
+    )
+    # With missing ARDS-main, loading site must refuse startup with ConfigError
+    registry = SiteRegistry(shadow_lab_root=shadow_lab_root)
+    monkeypatch.setattr(registry, "root", tmp_path)
+    with pytest.raises(ConfigError, match="Live shadow startup refused"):
+        registry._load_site_yaml(fake_site_yaml)
+
+    # 2. Test in ArdsNtesAdapter: if live_shadow is true but scraper is missing, refuses execution
+    adapter = ArdsNtesAdapter(
+        shadow_lab_root=shadow_lab_root,
+        ards_root=tmp_path / "nonexistent_ARDS",
+    )
+    # Mock site config with live_shadow: True
+    monkeypatch.setattr(
+        adapter.site_registry,
+        "get_site",
+        lambda sid: {
+            "site_id": sid,
+            "station": {"code": "NDLS", "name": "NEW DELHI"},
+            "platforms": {"configured": ["12", "13"]},
+            "ntes": {"allow_network": False},
+            "shadow": {"live_shadow": True, "production_write_allowed": False},
+        },
+    )
+    with pytest.raises(RuntimeError, match="Refusing live-shadow execution"):
+        adapter.get_snapshot("ndls_pf12_13")
+

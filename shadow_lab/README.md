@@ -10,21 +10,25 @@
 Run the automated test suite and preflight verification:
 
 ```bash
-# 1. Run all 61 automated unit, integration, and isolation tests
+# 1. Run all 95 automated unit, integration, isolation, and delayed bridge tests
 PYTHONPATH=shadow_lab/src train-identity-lab/.venv/bin/python -m pytest shadow_lab/tests/ -v
 
-# 2. Run system preflight health check across all sites
+# 2. Run system preflight health check across all sites (verifies ARDS NTES scraper availability)
 PYTHONPATH=shadow_lab/src train-identity-lab/.venv/bin/python -m shadow_identity.cli preflight
 
-# 3. Verify zero modifications to original ARDS production files
+# 3. Verify zero modifications to original ARDS production files (456 files)
 train-identity-lab/.venv/bin/python shadow_lab/scripts/verify_originals_unchanged.py
 
-# 4. Replay benchmark passages
+# 4. Start the operational delayed NTES verification worker service (+180s due time gate)
+PYTHONPATH=shadow_lab/src train-identity-lab/.venv/bin/python -m shadow_identity.cli run-delayed-worker --service --poll-interval 5.0
+
+# 5. Replay benchmark passages
 PYTHONPATH=shadow_lab/src train-identity-lab/.venv/bin/python -m shadow_identity.cli replay --site-id ndls_pf12_13 --fixtures shadow_lab/tests/fixtures/ndls_day.json
 
-# 5. Generate weekly side-by-side comparison report
+# 6. Generate weekly side-by-side comparison report
 PYTHONPATH=shadow_lab/src train-identity-lab/.venv/bin/python -m shadow_identity.cli compare --week-start 2026-10-12 --all-sites
 ```
+
 
 ---
 
@@ -57,15 +61,19 @@ shadow_lab/
 │   ├── coach_consensus.py         # Multi-frame aggregator with >=3 distinct coach rule
 │   ├── timetable_importer.py      # Decimal time parsing & leading zero preservation
 │   ├── timetable_matcher.py       # Site-specific timetable candidate matching
+│   ├── ntes_adapter.py            # Read-only adapter for approved ARDS NTES cache/scraper
+│   ├── delayed_ntes_worker.py     # Scheduled delayed NTES worker (+180s process_due loop)
+│   ├── passage_collector.py       # Multi-site read-only passage evidence collector
 │   ├── candidate_resolver.py      # Pure deterministic decision function (resolve_shadow)
 │   ├── ntes_archive.py            # Offline replay engine for recorded NTES JSONL snapshots
 │   ├── ocr_adapter.py             # Adapter for historical per-frame OCR CSVs
 │   └── comparison.py              # Side-by-side comparison & taxonomy engine
 ├── tests/
-│   ├── unit/                      # 50 unit tests across 5 modules
+│   ├── unit/                      # 68 unit tests across 8 modules
 │   ├── isolation/                 # 10 zero-production-write integrity tests
 │   ├── integration/               # 2-station simultaneous replay tests
 │   └── fixtures/                  # Benchmark passage fixtures (ndls_day, ndls_name_only, siteB)
+
 ├── scripts/
 │   ├── preflight_check.py         # Workspace health and config preflight script
 │   ├── verify_originals_unchanged.py # Verifies SHA256 hashes of all 456 ARDS-main files

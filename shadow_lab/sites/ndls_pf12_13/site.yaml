@@ -30,5 +30,7 @@ ntes:
   min_refresh_interval_s: 180
 shadow:
   enabled: true
+  live_shadow: false
   production_write_allowed: false
   manual_review_required_for_confirmations: true
+

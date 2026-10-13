@@ -92,6 +92,17 @@ class SiteRegistry:
                 f"Site '{site_id}' violated isolation contract: production_write_allowed must be strictly False!"
             )
 
+        # Preflight check: If live_shadow is requested, verify ARDS-main NTES scraper is available
+        live_shadow = shadow_cfg.get("live_shadow", False)
+        if live_shadow:
+            ards_ntes_script = self.root.parent / "ARDS-main" / "orchestrator" / "schedule" / "ntes_cache.py"
+            if not ards_ntes_script.is_file():
+                raise ConfigError(
+                    f"Site '{site_id}' requested live_shadow, but approved ARDS NTES scraper is unavailable: "
+                    f"{ards_ntes_script} not found! Live shadow startup refused."
+                )
+
+
         # Support timetable_file key
         if "timetable_file" in data:
             if "schedule" not in data:
