@@ -32,6 +32,7 @@ from shadow_identity.models import (
     VisualOcrEvidence,
 )
 from shadow_identity.timetable_importer import TimetableImporter
+from shadow_identity.passage_collector import ShadowCollector
 
 
 def get_repo_root() -> Path:
@@ -465,6 +466,139 @@ def cmd_compare(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_evaluate_passage(args: argparse.Namespace) -> int:
+    repo_root = get_repo_root()
+    p_path = Path(args.passage)
+    if not p_path.is_absolute():
+        p_path = repo_root / p_path
+    if not p_path.is_file():
+        print(f"[FAIL] Passage file not found: {p_path}")
+        return 1
+
+    collector = ShadowCollector(shadow_lab_root=repo_root / "shadow_lab")
+    with open(p_path, "r", encoding="utf-8") as f:
+        p_data = json.load(f)
+
+    site_id = getattr(args, "site_id", None) or p_data.get("site_id") or p_data.get("passage", {}).get("site_id") or "ndls_pf12_13"
+    bundle = collector.import_production_passage(source=p_data, site_id=site_id)
+
+    vis = bundle.visual
+    tt = bundle.timetable
+    nt = bundle.ntes
+    sh = bundle.shadow_result
+    prod = bundle.production
+    gt = bundle.ground_truth
+    cmp = bundle.comparison
+
+    print("\nVISUAL EVIDENCE")
+    top_name = vis.get("train_name_candidates", [{}])[0].get("name") if vis.get("train_name_candidates") else "none"
+    print(f"Train name: {top_name}")
+    pair_str = ", ".join(vis.get("stable_pair", [])) or "none"
+    print(f"Numbers: {pair_str}")
+
+    print("\nTIMETABLE")
+    top_cand = tt.get("candidate_services", [{}])[0] if tt.get("candidate_services") else {}
+    print(f"Candidate: {top_cand.get('train_number', 'none')}")
+    pf_disp = bundle.passage.get("observed_platform") or ", ".join(bundle.passage.get("possible_platforms", []))
+    print(f"Platform: {pf_disp}")
+    print(f"Scheduled: {bundle.passage.get('start_time')}")
+
+    print("\nNTES T1")
+    t1_snap = nt.get("pre_or_near_passage_snapshot")
+    if t1_snap and t1_snap.get("trains"):
+        for tr in t1_snap["trains"]:
+            print(f"{tr.get('train_number')} ({tr.get('train_name')}) present on PF {tr.get('platform')}")
+    else:
+        print("<none present / unavailable>")
+
+    print("\nNTES T2")
+    t2_snap = nt.get("post_passage_snapshot")
+    if t2_snap and t2_snap.get("trains"):
+        for tr in t2_snap["trains"]:
+            print(f"{tr.get('train_number')} ({tr.get('train_name')}) present on PF {tr.get('platform')}")
+    else:
+        print("<departed / empty>")
+
+    print("\nSHADOW RESULT")
+    print(sh.get("T2", {}).get("train_number") or "<none>")
+    print(sh.get("T2", {}).get("status"))
+
+    print("\nPRODUCTION RESULT")
+    print(f"{prod.get('train_number') or '<none>'} ({prod.get('confidence')})")
+
+    print("\nGROUND TRUTH")
+    print(gt.get("train_number") or "<unreviewed>")
+
+    print("\nCOMPARISON")
+    print(f"SHADOW = {cmp.get('production_vs_shadow')} ({cmp.get('category')})")
+    print("=" * 60)
+    return 0
+
+
+def cmd_import_passage(args: argparse.Namespace) -> int:
+    repo_root = get_repo_root()
+    p_path = Path(args.source)
+    if not p_path.is_absolute():
+        p_path = repo_root / p_path
+    if not p_path.is_file():
+        print(f"[FAIL] Source passage file not found: {p_path}")
+        return 1
+
+    collector = ShadowCollector(shadow_lab_root=repo_root / "shadow_lab")
+    try:
+        bundle = collector.import_production_passage(source=p_path, site_id=args.site_id)
+        print(f"[PASS] Successfully ingested passage: {bundle.passage_id}")
+        print(f"  - Site: {bundle.site_id}")
+        print(f"  - Production train: {bundle.production.get('train_number')}")
+        print(f"  - Shadow T2 train: {bundle.shadow_result.get('T2', {}).get('train_number')} ({bundle.shadow_result.get('T2', {}).get('status')})")
+        print(f"  - Comparison: {bundle.comparison.get('production_vs_shadow')}")
+        print(f"  - Bundle stored at: shadow_lab/data/passages/{bundle.passage_id}.json")
+    except Exception as e:
+        print(f"[FAIL] Import failed: {e}")
+        return 1
+    return 0
+
+
+def cmd_record_ground_truth(args: argparse.Namespace) -> int:
+    repo_root = get_repo_root()
+    collector = ShadowCollector(shadow_lab_root=repo_root / "shadow_lab")
+    try:
+        bundle = collector.record_ground_truth(
+            passage_id=args.passage_id,
+            train_number=args.train_number,
+            train_name=args.train_name,
+            reviewer=args.reviewer or "human_expert",
+            source=args.source or "manual_station_confirmation",
+            notes=args.notes,
+        )
+        print(f"[PASS] Ground truth recorded for passage: {bundle.passage_id}")
+        print(f"  - Verified train: {bundle.ground_truth.get('train_number')} ({bundle.ground_truth.get('train_name')})")
+        print(f"  - Reviewer: {bundle.ground_truth.get('reviewer')}")
+        print(f"  - Updated comparison category: {bundle.comparison.get('category')}")
+    except Exception as e:
+        print(f"[FAIL] Could not record ground truth: {e}")
+        return 1
+    return 0
+
+
+def cmd_daily_report(args: argparse.Namespace) -> int:
+    repo_root = get_repo_root()
+    collector = ShadowCollector(shadow_lab_root=repo_root / "shadow_lab")
+    csv_p, md_p = collector.generate_daily_report(report_date=args.date, site_id=args.site_id)
+    print(f"[PASS] Daily Report CSV: {csv_p}")
+    print(f"[PASS] Daily Report Markdown: {md_p}")
+    return 0
+
+
+def cmd_weekly_report(args: argparse.Namespace) -> int:
+    repo_root = get_repo_root()
+    collector = ShadowCollector(shadow_lab_root=repo_root / "shadow_lab")
+    csv_p, md_p = collector.generate_weekly_report(week_start=args.week_start, site_id=args.site_id)
+    print(f"[PASS] Weekly Report CSV: {csv_p}")
+    print(f"[PASS] Weekly Report Markdown: {md_p}")
+    return 0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="python -m shadow_identity.cli",
@@ -485,6 +619,35 @@ def main() -> None:
     p_rep.add_argument("--site-id", required=True, help="Site ID for replay")
     p_rep.add_argument("--fixtures", required=True, help="Path to fixture JSON file")
 
+    # evaluate-passage (§28)
+    p_eva = subparsers.add_parser("evaluate-passage", help="Transparently evaluate single passage")
+    p_eva.add_argument("--passage", required=True, help="Path to passage JSON file")
+    p_eva.add_argument("--site-id", default=None, help="Site ID (optional, defaults to file site)")
+
+    # import-passage (§4)
+    p_imp = subparsers.add_parser("import-passage", help="Safely import production passage into shadow lab")
+    p_imp.add_argument("--source", required=True, help="Path to production passage JSON")
+    p_imp.add_argument("--site-id", required=True, help="Site ID")
+
+    # record-ground-truth (§19)
+    p_rgt = subparsers.add_parser("record-ground-truth", help="Record verified manual ground truth")
+    p_rgt.add_argument("--passage-id", required=True, help="Passage ID")
+    p_rgt.add_argument("--train-number", required=True, help="Ground truth train number")
+    p_rgt.add_argument("--train-name", default=None, help="Ground truth train name")
+    p_rgt.add_argument("--reviewer", default="human_expert", help="Reviewer identifier")
+    p_rgt.add_argument("--source", default="manual_station_confirmation", help="Verification source")
+    p_rgt.add_argument("--notes", default=None, help="Review notes")
+
+    # daily-report (§29)
+    p_day = subparsers.add_parser("daily-report", help="Generate daily comparison report")
+    p_day.add_argument("--date", required=True, help="Date YYYY-MM-DD")
+    p_day.add_argument("--site-id", default=None, help="Site ID filter (optional)")
+
+    # weekly-report (§30)
+    p_wkr = subparsers.add_parser("weekly-report", help="Generate weekly comparison report")
+    p_wkr.add_argument("--week-start", default="2026-10-12", help="Start date of evaluation week")
+    p_wkr.add_argument("--site-id", default=None, help="Site ID filter (optional)")
+
     # verify-no-writes
     p_vnw = subparsers.add_parser("verify-no-writes", help="Verify zero changes to production ARDS")
     p_vnw.add_argument("--baseline-manifest", default=None, help="Path to original hashes JSON")
@@ -504,6 +667,11 @@ def main() -> None:
         "preflight": cmd_preflight,
         "validate-schedule": cmd_validate_schedule,
         "replay": cmd_replay,
+        "evaluate-passage": cmd_evaluate_passage,
+        "import-passage": cmd_import_passage,
+        "record-ground-truth": cmd_record_ground_truth,
+        "daily-report": cmd_daily_report,
+        "weekly-report": cmd_weekly_report,
         "verify-no-writes": cmd_verify_no_writes,
         "compare": cmd_compare,
     }

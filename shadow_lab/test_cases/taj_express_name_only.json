@@ -1,0 +1,77 @@
+{
+  "site_id": "ndls_pf12_13",
+  "passage_id": "2026-10-13T06-55-00_P001",
+  "passage": {
+    "start_time": "2026-10-13T06:54:40+05:30",
+    "end_time": "2026-10-13T06:56:10+05:30",
+    "observed_platform": "13",
+    "possible_platforms": ["12", "13"]
+  },
+  "production": {
+    "train_number": "12004",
+    "confidence": "LOW",
+    "resolver_source": "existing_ards"
+  },
+  "visual": {
+    "coach_evidence": [
+      {
+        "coach_id": "C01",
+        "frame_id": 101,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "confidence": 0.96
+      },
+      {
+        "coach_id": "C02",
+        "frame_id": 204,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "confidence": 0.95
+      },
+      {
+        "coach_id": "C03",
+        "frame_id": 312,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "confidence": 0.97
+      }
+    ]
+  },
+  "ntes": {
+    "pre_or_near_passage_snapshot": {
+      "site_id": "ndls_pf12_13",
+      "station_code": "NDLS",
+      "fetched_at": "2026-10-13T06:54:00+05:30",
+      "trains": [
+        {
+          "train_number": "12280",
+          "train_name": "TAJ EXP",
+          "platform": "13"
+        }
+      ]
+    },
+    "post_passage_snapshot": {
+      "site_id": "ndls_pf12_13",
+      "station_code": "NDLS",
+      "fetched_at": "2026-10-13T06:57:30+05:30",
+      "trains": [
+        {
+          "train_number": "12280",
+          "train_name": "TAJ EXP",
+          "platform": "13"
+        }
+      ]
+    }
+  },
+  "ground_truth": {
+    "reviewed": true,
+    "train_number": "12280",
+    "train_name": "TAJ EXPRESS",
+    "reviewer": "operator_manual",
+    "review_source": "manual station confirmation",
+    "notes": "Verified visually departing PF 13"
+  }
+}

@@ -212,3 +212,20 @@ class ComparisonRecord:
     resolver_version: str
     ocr_model_version: str
     site_config_hash: str
+
+
+@dataclass
+class PassageBundle:
+    site_id: str
+    passage_id: str
+    passage: Dict[str, Any]
+    production: Dict[str, Any]
+    visual: Dict[str, Any]
+    timetable: Dict[str, Any]
+    ntes: Dict[str, Any]
+    shadow_result: Dict[str, Any]
+    comparison: Dict[str, Any]
+    ground_truth: Dict[str, Any]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)

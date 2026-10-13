@@ -215,10 +215,9 @@ def resolve_shadow(
                 if sim >= 0.6:
                     candidates_map[t_no].evidence_list.append("CORROBORATION_VISUAL_NAME_AND_NTES")
                     candidates_map[t_no].score += 3.0
-    elif ntes_active is None:
-        pass
     else:
-        reason_codes.append(RC_NTES_UNAVAILABLE)
+        if RC_NTES_UNAVAILABLE not in reason_codes:
+            reason_codes.append(RC_NTES_UNAVAILABLE)
 
     # 5. Process Stage T2 (+180s post-passage check)
     post_kind = "UNAVAILABLE"

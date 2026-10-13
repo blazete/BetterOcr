@@ -1,0 +1,310 @@
+{
+  "site_id": "ndls_pf12_13",
+  "passage_id": "PAS_SCENARIO_03",
+  "passage": {
+    "start_time": "2026-10-13T20:05:00+05:30",
+    "end_time": "2026-10-13T20:05:00+05:30",
+    "observed_platform": null,
+    "possible_platforms": [
+      "12",
+      "13"
+    ],
+    "direction": "unknown",
+    "source_files": []
+  },
+  "production": {
+    "inspection_id": null,
+    "train_number": null,
+    "confidence": "LOW",
+    "resolver_source": "existing_ards",
+    "recorded_at": "2026-10-13T20:05:00+05:30"
+  },
+  "visual": {
+    "service_numbers": [
+      {
+        "number": "12559",
+        "distinct_coaches": 3,
+        "total_observations": 3,
+        "mean_confidence": 0.95
+      },
+      {
+        "number": "12560",
+        "distinct_coaches": 3,
+        "total_observations": 3,
+        "mean_confidence": 0.95
+      },
+      {
+        "number": "12451",
+        "distinct_coaches": 3,
+        "total_observations": 3,
+        "mean_confidence": 0.95
+      },
+      {
+        "number": "12452",
+        "distinct_coaches": 3,
+        "total_observations": 3,
+        "mean_confidence": 0.95
+      }
+    ],
+    "stable_pair": [
+      "12559",
+      "12560"
+    ],
+    "train_name_candidates": [
+      {
+        "name": "SHIV GANGA",
+        "distinct_coaches": 3,
+        "total_observations": 3,
+        "mean_confidence": 0.95
+      }
+    ],
+    "endpoint_candidates": [],
+    "coach_evidence": [
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 0,
+        "raw_text": "12559",
+        "normalized_text": "12559",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 0,
+        "raw_text": "12560",
+        "normalized_text": "12560",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 0,
+        "raw_text": "12451",
+        "normalized_text": "12451",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 0,
+        "raw_text": "12452",
+        "normalized_text": "12452",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 0,
+        "raw_text": "SHIV GANGA",
+        "normalized_text": "SHIV GANGA",
+        "entity_type": "TRAIN_NAME",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 0,
+        "raw_text": "12559",
+        "normalized_text": "12559",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 0,
+        "raw_text": "12560",
+        "normalized_text": "12560",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 0,
+        "raw_text": "12451",
+        "normalized_text": "12451",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 0,
+        "raw_text": "12452",
+        "normalized_text": "12452",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 0,
+        "raw_text": "SHIV GANGA",
+        "normalized_text": "SHIV GANGA",
+        "entity_type": "TRAIN_NAME",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 0,
+        "raw_text": "12559",
+        "normalized_text": "12559",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 0,
+        "raw_text": "12560",
+        "normalized_text": "12560",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 0,
+        "raw_text": "12451",
+        "normalized_text": "12451",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 0,
+        "raw_text": "12452",
+        "normalized_text": "12452",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 0,
+        "raw_text": "SHIV GANGA",
+        "normalized_text": "SHIV GANGA",
+        "entity_type": "TRAIN_NAME",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      }
+    ],
+    "numeric_status": "COMPLEX_BOARD",
+    "number_board_type": "FOUR_NUMBER"
+  },
+  "timetable": {
+    "version": "2026-10-13-validated-v1",
+    "candidate_services": [
+      {
+        "train_number": "12560",
+        "train_name": "NDLS-BSBS (SHIV GANGA EXP.)",
+        "score": 11.0,
+        "evidence_list": [
+          "TIMETABLE_EXACT_NUMBER_MATCH",
+          "TIMETABLE_NAME_MATCH_100PCT",
+          "TIMETABLE_TIME_WINDOW_DELTA_0MIN",
+          "TIMETABLE_PLATFORM_12"
+        ],
+        "contradictions": []
+      },
+      {
+        "train_number": "64568",
+        "train_name": "TKJ-BSC MEMU",
+        "score": 2.556,
+        "evidence_list": [
+          "TIMETABLE_TIME_WINDOW_DELTA_20MIN",
+          "TIMETABLE_PLATFORM_13"
+        ],
+        "contradictions": []
+      }
+    ]
+  },
+  "ntes": {
+    "pre_or_near_passage_snapshot": null,
+    "post_passage_snapshot": null
+  },
+  "shadow_result": {
+    "T0": {
+      "train_number": "12560",
+      "status": "PROVISIONAL",
+      "reason_codes": [
+        "NTES_UNAVAILABLE_OR_TIMED_OUT",
+        "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
+        "VISUAL_COMPLEX_4_OR_6_NUMBER_BOARD",
+        "VISUAL_NAME_STRONG_CONSENSUS"
+      ]
+    },
+    "T1": {
+      "train_number": "12560",
+      "status": "PROVISIONAL",
+      "reason_codes": [
+        "NTES_UNAVAILABLE_OR_TIMED_OUT",
+        "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
+        "VISUAL_COMPLEX_4_OR_6_NUMBER_BOARD",
+        "VISUAL_NAME_STRONG_CONSENSUS"
+      ]
+    },
+    "T2": {
+      "train_number": "12560",
+      "status": "PROVISIONAL",
+      "reason_codes": [
+        "NTES_UNAVAILABLE_OR_TIMED_OUT",
+        "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
+        "VISUAL_COMPLEX_4_OR_6_NUMBER_BOARD",
+        "VISUAL_NAME_STRONG_CONSENSUS"
+      ],
+      "post_fetch_kind": "UNAVAILABLE"
+    }
+  },
+  "comparison": {
+    "category": "DISAGREE_NO_GROUND_TRUTH",
+    "production_vs_shadow": "SHADOW_ONLY",
+    "review_required": true,
+    "failure_reason": null
+  },
+  "ground_truth": {
+    "reviewed": false,
+    "train_number": null,
+    "train_name": null,
+    "reviewer": null,
+    "source": null,
+    "notes": null
+  }
+}

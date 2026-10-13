@@ -54,24 +54,27 @@ class SiteRegistry:
             return yaml.safe_load(f).get("shadow_defaults", {})
 
     def _load_all_sites(self) -> None:
-        if not self.sites_dir.exists():
-            return
-        for s_dir in sorted(self.sites_dir.iterdir()):
-            if s_dir.is_dir():
-                site_yaml = s_dir / "site.yaml"
-                if site_yaml.exists():
-                    site_cfg = self._load_site_yaml(site_yaml)
-                    site_id = site_cfg["site_id"]
-                    self.sites[site_id] = site_cfg
+        # Check both config/sites and sites directories
+        dirs_to_check = [self.config_dir / "sites", self.sites_dir]
+        for base_dir in dirs_to_check:
+            if not base_dir.exists():
+                continue
+            for s_dir in sorted(base_dir.iterdir()):
+                if s_dir.is_dir():
+                    site_yaml = s_dir / "site.yaml"
+                    if site_yaml.exists():
+                        site_cfg = self._load_site_yaml(site_yaml)
+                        site_id = site_cfg["site_id"]
+                        self.sites[site_id] = site_cfg
 
-                    # Load optional aliases.yaml
-                    alias_file = s_dir / "aliases.yaml"
-                    if alias_file.exists():
-                        with open(alias_file, "r") as af:
-                            a_data = yaml.safe_load(af) or {}
-                            self.aliases[site_id] = a_data.get("aliases", {})
-                    else:
-                        self.aliases[site_id] = {}
+                        # Load optional aliases.yaml
+                        alias_file = s_dir / "aliases.yaml"
+                        if alias_file.exists():
+                            with open(alias_file, "r") as af:
+                                a_data = yaml.safe_load(af) or {}
+                                self.aliases[site_id] = a_data.get("aliases", {})
+                        elif site_id not in self.aliases:
+                            self.aliases[site_id] = {}
 
     def _load_site_yaml(self, path: Path) -> Dict[str, Any]:
         with open(path, "r") as f:
@@ -89,14 +92,31 @@ class SiteRegistry:
                 f"Site '{site_id}' violated isolation contract: production_write_allowed must be strictly False!"
             )
 
+        # Support timetable_file key
+        if "timetable_file" in data:
+            if "schedule" not in data:
+                data["schedule"] = {}
+            if "path" not in data["schedule"]:
+                data["schedule"]["path"] = data["timetable_file"]
+
         # Verify schedule path and checksum if specified
         sched_cfg = data.get("schedule", {})
         sched_path_str = sched_cfg.get("path")
         if sched_path_str:
             sched_path = Path(sched_path_str)
             if not sched_path.is_absolute():
-                sched_path = self.root.parent / sched_path
-            if not sched_path.exists():
+                candidates = [
+                    self.root.parent / sched_path,
+                    self.root / sched_path,
+                    path.parent / sched_path,
+                    path.parent / sched_path.name,
+                ]
+                found = next((p for p in candidates if p.exists()), None)
+                if found:
+                    sched_path = found
+                else:
+                    raise ConfigError(f"Site '{site_id}' schedule file not found: {sched_path_str}")
+            elif not sched_path.exists():
                 raise ConfigError(f"Site '{site_id}' schedule file not found: {sched_path}")
             
             expected_hash = sched_cfg.get("checksum_sha256")

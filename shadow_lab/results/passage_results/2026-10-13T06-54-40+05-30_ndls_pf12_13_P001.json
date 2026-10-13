@@ -1,0 +1,196 @@
+{
+  "site_id": "ndls_pf12_13",
+  "passage_id": "2026-10-13T06-54-40+05-30_ndls_pf12_13_P001",
+  "passage": {
+    "start_time": "2026-10-13T06:54:40+05:30",
+    "end_time": "2026-10-13T06:56:10+05:30",
+    "observed_platform": "13",
+    "possible_platforms": [
+      "12",
+      "13"
+    ],
+    "direction": "unknown",
+    "source_files": []
+  },
+  "production": {
+    "inspection_id": null,
+    "train_number": "12004",
+    "confidence": "LOW",
+    "resolver_source": "existing_ards",
+    "recorded_at": "2026-10-13T06:56:10+05:30"
+  },
+  "visual": {
+    "service_numbers": [],
+    "stable_pair": [],
+    "train_name_candidates": [
+      {
+        "name": "TAJ EXPRESS",
+        "distinct_coaches": 3,
+        "total_observations": 3,
+        "mean_confidence": 0.96
+      }
+    ],
+    "endpoint_candidates": [],
+    "coach_evidence": [
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 101,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.96,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 204,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 312,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.97,
+        "image_ref": null
+      }
+    ],
+    "numeric_status": "NOT_NUMBERED",
+    "number_board_type": "NOT_NUMBERED"
+  },
+  "timetable": {
+    "version": "2026-10-13-validated-v1",
+    "candidate_services": [
+      {
+        "train_number": "12280",
+        "train_name": "NDLS-VGLJ, TAJ EXP",
+        "score": 5.978,
+        "evidence_list": [
+          "TIMETABLE_NAME_MATCH_100PCT",
+          "TIMETABLE_TIME_WINDOW_DELTA_-1MIN",
+          "TIMETABLE_PLATFORM_13"
+        ],
+        "contradictions": []
+      },
+      {
+        "train_number": "12303",
+        "train_name": "HWH-NDLS Poorva Exp",
+        "score": 1.911,
+        "evidence_list": [
+          "TIMETABLE_TIME_WINDOW_DELTA_49MIN",
+          "TIMETABLE_PLATFORM_12"
+        ],
+        "contradictions": []
+      }
+    ]
+  },
+  "ntes": {
+    "pre_or_near_passage_snapshot": {
+      "site_id": "ndls_pf12_13",
+      "station_code": "NDLS",
+      "requested_at": "",
+      "fetched_at": "2026-10-13T06:54:00+05:30",
+      "window_hr": 2,
+      "available": true,
+      "from_cache": false,
+      "stale_fallback": false,
+      "snapshot_age_seconds_at_decision": 0.0,
+      "source": "replay",
+      "trains": [
+        {
+          "train_number": "12280",
+          "train_name": "TAJ EXP",
+          "platform": "13",
+          "time_min": null,
+          "time_raw": "",
+          "is_originating": false,
+          "is_terminating": false,
+          "dep_min": null
+        }
+      ],
+      "raw_hash": ""
+    },
+    "post_passage_snapshot": {
+      "site_id": "ndls_pf12_13",
+      "station_code": "NDLS",
+      "requested_at": "",
+      "fetched_at": "2026-10-13T06:57:30+05:30",
+      "window_hr": 2,
+      "available": true,
+      "from_cache": false,
+      "stale_fallback": false,
+      "snapshot_age_seconds_at_decision": 0.0,
+      "source": "replay",
+      "trains": [
+        {
+          "train_number": "12280",
+          "train_name": "TAJ EXP",
+          "platform": "13",
+          "time_min": null,
+          "time_raw": "",
+          "is_originating": false,
+          "is_terminating": false,
+          "dep_min": null
+        }
+      ],
+      "raw_hash": ""
+    }
+  },
+  "shadow_result": {
+    "T0": {
+      "train_number": "12280",
+      "status": "PROVISIONAL",
+      "reason_codes": [
+        "NTES_UNAVAILABLE_OR_TIMED_OUT",
+        "VISUAL_BOARD_NOT_NUMBERED",
+        "VISUAL_NAME_STRONG_CONSENSUS"
+      ]
+    },
+    "T1": {
+      "train_number": "12280",
+      "status": "PROVISIONAL",
+      "reason_codes": [
+        "NTES_CORROBORATED_FRESH_BOARD",
+        "VISUAL_BOARD_NOT_NUMBERED",
+        "VISUAL_NAME_STRONG_CONSENSUS"
+      ]
+    },
+    "T2": {
+      "train_number": "12280",
+      "status": "PROVISIONAL",
+      "reason_codes": [
+        "NTES_CORROBORATED_FRESH_BOARD",
+        "NTES_POST_180S_ABSENT_NON_NEGATIVE_PROOF",
+        "NTES_POST_180S_CONFIRMED",
+        "VISUAL_BOARD_NOT_NUMBERED",
+        "VISUAL_NAME_STRONG_CONSENSUS"
+      ],
+      "post_fetch_kind": "NEW_FETCH"
+    }
+  },
+  "comparison": {
+    "category": "PRODUCTION_ABSTAINS_SHADOW_CORRECT",
+    "production_vs_shadow": "CONFLICT",
+    "review_required": false,
+    "failure_reason": "OCR_NUMBER_FAILURE"
+  },
+  "ground_truth": {
+    "reviewed": true,
+    "train_number": "12280",
+    "train_name": "TAJ EXPRESS",
+    "reviewer": "operator_manual",
+    "source": "manual station confirmation",
+    "notes": "Verified visually departing PF 13"
+  }
+}

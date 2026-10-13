@@ -1,0 +1,22 @@
+# Name aliases and transliteration maps for NDLS
+aliases:
+  "LUCKNOW MAIL":
+    canonical_name: "LUCKNOW MAIL"
+    service_numbers: ["12229", "12230"]
+    endpoints: ["NEW DELHI", "LUCKNOW"]
+    variations: ["NDLS-LJN LUCKNOW MAIL", "LUCKNOW EXPRESS", "LUCKNOW MAIL EXP"]
+  "TAJ EXPRESS":
+    canonical_name: "TAJ EXPRESS"
+    service_numbers: ["12279", "12280"]
+    endpoints: ["NEW DELHI", "VGL JHANSI", "GWALIOR"]
+    variations: ["NDLS-VGLJ TAJ EXP", "TAJ EXP", "TAJ SUPERFAST"]
+  "SHIV GANGA":
+    canonical_name: "SHIV GANGA EXPRESS"
+    service_numbers: ["12559", "12560"]
+    endpoints: ["NEW DELHI", "BANARAS"]
+    variations: ["BSBS-NDLS SHIV GANGA", "SHIVGANGA EXP"]
+  "SHRAM SHAKTI":
+    canonical_name: "SHRAM SHKTI EXP"
+    service_numbers: ["12451", "12452"]
+    endpoints: ["NEW DELHI", "KANPUR CENTRAL"]
+    variations: ["NDLS-CNB SHRAM SHKTI", "SHRAM SHAKTI EXP"]

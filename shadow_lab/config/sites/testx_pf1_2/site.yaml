@@ -1,0 +1,46 @@
+site_id: testx_pf1_2
+station_code: TESTX
+station_name: TESTX STATION
+station:
+  code: TESTX
+  name: TESTX STATION
+  ntes_query: "TESTX - TESTX STATION"
+  timezone: Asia/Kolkata
+platforms:
+  configured: ["1", "2"]
+  observable_from_camera: true
+  possible_when_unknown: ["1", "2"]
+timetable_file: shadow_lab/config/sites/testx_pf1_2/timetable.csv
+schedule:
+  path: shadow_lab/config/sites/testx_pf1_2/timetable.csv
+  version: "2026-10-13-synthetic-v1"
+  effective_from: "2026-01-01"
+  checksum_sha256: "SET_FROM_IMPORTED_FILE"
+  approved_by: "TESTX_OPERATOR_VERIFIED"
+ntes:
+  enabled: true
+  cache_ttl_seconds: 180
+  verification_delay_seconds: 180
+  ttl_s: 180
+  post_passage_offset_s: 180
+  optional_second_check_offset_s: 300
+  mode: replay_only
+  allow_network: false
+  fetch_timeout_s: 8
+camera_mapping:
+  side_left: camera_1
+  side_right: camera_2
+  top: camera_3
+cameras:
+  - camera_id: side_b
+    role: train_identity
+    direction_calibration: verified
+timetable_window:
+  arrival_early_minutes: 30
+  arrival_late_minutes: 180
+  departure_early_minutes: 30
+  departure_late_minutes: 180
+shadow:
+  enabled: true
+  production_write_allowed: false
+  manual_review_required_for_confirmations: true

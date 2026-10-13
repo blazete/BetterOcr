@@ -1,0 +1,144 @@
+{
+  "site_id": "ndls_pf12_13",
+  "passage_id": "PAS_SAFE_001",
+  "passage": {
+    "start_time": "2026-10-13T17:20:00+05:30",
+    "end_time": "2026-10-13T17:21:00+05:30",
+    "observed_platform": "12",
+    "possible_platforms": [
+      "12",
+      "13"
+    ],
+    "direction": "unknown",
+    "source_files": []
+  },
+  "production": {
+    "inspection_id": "INSP_SAFE_001",
+    "train_number": "12920",
+    "confidence": "HIGH",
+    "resolver_source": "production_ards",
+    "recorded_at": "2026-10-13T17:21:00+05:30"
+  },
+  "visual": {
+    "service_numbers": [
+      {
+        "number": "12920",
+        "distinct_coaches": 3,
+        "total_observations": 3,
+        "mean_confidence": 0.95
+      }
+    ],
+    "stable_pair": [
+      "12920"
+    ],
+    "train_name_candidates": [],
+    "endpoint_candidates": [],
+    "coach_evidence": [
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 10,
+        "raw_text": "12920",
+        "normalized_text": "12920",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 20,
+        "raw_text": "12920",
+        "normalized_text": "12920",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 30,
+        "raw_text": "12920",
+        "normalized_text": "12920",
+        "entity_type": "SERVICE_NUMBER",
+        "timestamp_offset_ms": 0,
+        "bbox": [],
+        "ocr_confidence": 0.95,
+        "image_ref": null
+      }
+    ],
+    "numeric_status": "PAIR_PROVISIONAL",
+    "number_board_type": "TWO_NUMBER"
+  },
+  "timetable": {
+    "version": "2026-10-13-validated-v1",
+    "candidate_services": [
+      {
+        "train_number": "12314",
+        "train_name": "NDLS-SEALDAH RAJ",
+        "score": 3.0,
+        "evidence_list": [
+          "TIMETABLE_TIME_WINDOW_DELTA_0MIN",
+          "TIMETABLE_PLATFORM_13"
+        ],
+        "contradictions": []
+      },
+      {
+        "train_number": "64432",
+        "train_name": "NDLS-GZB EMU",
+        "score": 1.889,
+        "evidence_list": [
+          "TIMETABLE_TIME_WINDOW_DELTA_50MIN",
+          "TIMETABLE_PLATFORM_13"
+        ],
+        "contradictions": []
+      }
+    ]
+  },
+  "ntes": {
+    "pre_or_near_passage_snapshot": null,
+    "post_passage_snapshot": null
+  },
+  "shadow_result": {
+    "T0": {
+      "train_number": "12314",
+      "status": "PROVISIONAL",
+      "reason_codes": [
+        "NTES_UNAVAILABLE_OR_TIMED_OUT",
+        "VISUAL_PAIR_PROVISIONAL_LT3_COACHES"
+      ]
+    },
+    "T1": {
+      "train_number": "12314",
+      "status": "PROVISIONAL",
+      "reason_codes": [
+        "NTES_UNAVAILABLE_OR_TIMED_OUT",
+        "VISUAL_PAIR_PROVISIONAL_LT3_COACHES"
+      ]
+    },
+    "T2": {
+      "train_number": "12314",
+      "status": "PROVISIONAL",
+      "reason_codes": [
+        "NTES_UNAVAILABLE_OR_TIMED_OUT",
+        "VISUAL_PAIR_PROVISIONAL_LT3_COACHES"
+      ],
+      "post_fetch_kind": "UNAVAILABLE"
+    }
+  },
+  "comparison": {
+    "category": "DISAGREE_NO_GROUND_TRUTH",
+    "production_vs_shadow": "CONFLICT",
+    "review_required": true,
+    "failure_reason": "NTES_UNAVAILABLE"
+  },
+  "ground_truth": {
+    "reviewed": false,
+    "train_number": null,
+    "train_name": null,
+    "reviewer": null,
+    "source": null,
+    "notes": null
+  }
+}
