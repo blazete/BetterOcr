@@ -113,7 +113,26 @@
   },
   "timetable": {
     "version": "2026-10-13-validated-v1",
-    "candidate_services": []
+    "candidate_services": [
+      {
+        "train_number": "12001",
+        "train_name": "",
+        "score": 4.5,
+        "evidence_list": [
+          "VISUAL_NUMBER_GE3_COACHES"
+        ],
+        "contradictions": []
+      },
+      {
+        "train_number": "12002",
+        "train_name": "",
+        "score": 4.5,
+        "evidence_list": [
+          "VISUAL_NUMBER_GE3_COACHES"
+        ],
+        "contradictions": []
+      }
+    ]
   },
   "ntes": {
     "pre_or_near_passage_snapshot": {
@@ -156,8 +175,9 @@
   "shadow_result": {
     "T0": {
       "train_number": null,
-      "status": "UNKNOWN",
+      "status": "AMBIGUOUS",
       "reason_codes": [
+        "AMBIGUOUS_MULTIPLE_EQUAL_CANDIDATES",
         "NTES_UNAVAILABLE_OR_TIMED_OUT",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
         "VISUAL_PAIR_CONFIRMED_GE3_COACHES"

@@ -42,6 +42,7 @@ from shadow_identity.reason_codes import (
     RC_SCHEDULE_TIME_WINDOW_MATCH,
     RC_SCHEDULE_UNAVAILABLE,
     RC_SCHEDULE_WRONG_STATION_REJECTED,
+    RC_TIMETABLE_NTES_CONFLICT,
     RC_VISUAL_BOARD_NOT_NUMBERED,
     RC_VISUAL_COMPLEX_BOARD,
     RC_VISUAL_NAME_STRONG,
@@ -51,6 +52,7 @@ from shadow_identity.reason_codes import (
     RC_VISUAL_PAIR_CONFIRMED,
     RC_VISUAL_PAIR_PROVISIONAL,
     RC_VISUAL_SINGLE_CANDIDATE,
+    RC_VISUAL_TIMETABLE_CONFLICT,
 )
 from shadow_identity.text_normalization import match_name_similarity, match_name_with_aliases
 from shadow_identity.timetable_matcher import TimetableMatcher
@@ -93,6 +95,7 @@ def resolve_shadow(
     # 2. Extract visual features
     v_cons = visual_evidence.passage_consensus
     num_cands = [c.number for c in v_cons.service_number_candidates if c.distinct_coaches >= 1]
+    strong_num_cands = [c.number for c in v_cons.service_number_candidates if c.distinct_coaches >= 3]
     stable_pair = v_cons.stable_pair
     top_names = [c.name for c in v_cons.train_name_candidates]
     top_name = top_names[0] if top_names else None
@@ -145,9 +148,24 @@ def resolve_shadow(
         )
         candidates_map[t_no] = c_obj
 
+    # Register visual candidates with >= 3 distinct coaches in candidates_map
+    for v_num in strong_num_cands:
+        if v_num not in candidates_map:
+            candidates_map[v_num] = CandidateService(
+                train_number=v_num,
+                train_name=top_name or "",
+                score=4.5,
+                evidence_list=["VISUAL_NUMBER_GE3_COACHES"],
+                contradictions=[],
+            )
+        else:
+            candidates_map[v_num].evidence_list.append("VISUAL_NUMBER_GE3_COACHES")
+            candidates_map[v_num].score += 4.5
+
     # 4. Process NTES before/at passage (Stage T1 baseline)
     ntes_active = ntes_before if ntes_before is not None else (ntes_after if stage == "T2" else None)
     is_fresh_ntes = False
+    ntes_trains: List[NtesTrainEntry] = []
 
     if ntes_active and ntes_active.available:
         # P0 Check 1: Enforce Station and Site Isolation
@@ -237,6 +255,17 @@ def resolve_shadow(
         else:
             post_kind = "UNAVAILABLE"
 
+    # Platform-level Timetable vs NTES conflict check
+    sched_active_numbers = {
+        sm["train_number"]
+        for sm in sched_matches
+        if "SCHEDULE_OUTSIDE_TIME_WINDOW" not in sm.get("evidence", [])
+    }
+    ntes_active_numbers = {nt.train_number for nt in ntes_trains}
+    if sched_active_numbers and ntes_active_numbers and not (sched_active_numbers & ntes_active_numbers):
+        if RC_TIMETABLE_NTES_CONFLICT not in reason_codes:
+            reason_codes.append(RC_TIMETABLE_NTES_CONFLICT)
+
     # 6. Rank candidates and resolve final decision
     ranked_candidates = sorted(candidates_map.values(), key=lambda c: c.score, reverse=True)
 
@@ -257,9 +286,29 @@ def resolve_shadow(
 
         # Check for conflicts
         if stable_pair and top_cand.train_number not in stable_pair and v_cons.numeric_status == "PAIR_CONFIRMED":
-            reason_codes.append(RC_VISUAL_NTES_CONFLICT)
+            has_ntes = any("NTES_" in ev for ev in top_cand.evidence_list)
+            has_tt = any("TIMETABLE_" in ev or "SCHEDULE_" in ev for ev in top_cand.evidence_list)
+            if has_ntes:
+                reason_codes.append(RC_VISUAL_NTES_CONFLICT)
+            if has_tt:
+                reason_codes.append(RC_VISUAL_TIMETABLE_CONFLICT)
+            if not has_ntes and not has_tt:
+                reason_codes.append(RC_VISUAL_NTES_CONFLICT)
             final_status = "CONFLICT"
             final_number = None
+
+        elif len(strong_num_cands) == 1 and top_cand.train_number != strong_num_cands[0]:
+            vis_single = strong_num_cands[0]
+            has_ntes = any("NTES_" in ev for ev in top_cand.evidence_list)
+            if has_ntes:
+                reason_codes.append(RC_VISUAL_NTES_CONFLICT)
+                final_status = "CONFLICT"
+                final_number = None
+            else:
+                # Strong single-number visual candidate protected from timetable-only replacement (§1)
+                reason_codes.append(RC_VISUAL_TIMETABLE_CONFLICT)
+                final_status = "PROVISIONAL"
+                final_number = vis_single
 
         elif top_cand.train_number.startswith("6"):
             reason_codes.append(RC_NOT_SERVICE_EVENT)
@@ -279,6 +328,10 @@ def resolve_shadow(
                 has_direction = any(RC_DIRECTION_CORROBORATED in ev for ev in top_cand.evidence_list)
                 has_strong_name = any("CORROBORATION_VISUAL_NAME" in ev or "TIMETABLE_NAME_MATCH" in ev for ev in top_cand.evidence_list)
 
+                if sched_active_numbers and top_cand.train_number not in sched_active_numbers:
+                    if RC_VISUAL_TIMETABLE_CONFLICT not in reason_codes:
+                        reason_codes.append(RC_VISUAL_TIMETABLE_CONFLICT)
+
                 if has_fresh_ntes or has_direction or has_strong_name:
                     final_status = "CONFIRMED"
                     final_number = top_cand.train_number
@@ -290,8 +343,22 @@ def resolve_shadow(
 
         # Pathway B: Provisional Visual Pair
         elif v_cons.numeric_status == "PAIR_PROVISIONAL":
-            final_status = "PROVISIONAL"
-            final_number = top_cand.train_number
+            if len(strong_num_cands) == 1:
+                vis_single = strong_num_cands[0]
+                if sched_active_numbers and vis_single not in sched_active_numbers:
+                    if RC_VISUAL_TIMETABLE_CONFLICT not in reason_codes:
+                        reason_codes.append(RC_VISUAL_TIMETABLE_CONFLICT)
+                if ntes_active_numbers and vis_single not in ntes_active_numbers:
+                    if RC_VISUAL_NTES_CONFLICT not in reason_codes:
+                        reason_codes.append(RC_VISUAL_NTES_CONFLICT)
+                    final_status = "CONFLICT"
+                    final_number = None
+                else:
+                    final_status = "PROVISIONAL"
+                    final_number = vis_single
+            else:
+                final_status = "PROVISIONAL"
+                final_number = top_cand.train_number
 
         # Pathway C: Complex 4/6-Number Board
         elif v_cons.numeric_status == "COMPLEX_BOARD":

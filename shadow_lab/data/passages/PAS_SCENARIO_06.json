@@ -97,6 +97,7 @@
       "reason_codes": [
         "NTES_CORROBORATED_STALE_BOARD",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
+        "TIMETABLE_NTES_CONFLICT",
         "VISUAL_NUMBERS_UNAVAILABLE"
       ]
     },
@@ -106,6 +107,7 @@
       "reason_codes": [
         "NTES_CORROBORATED_STALE_BOARD",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
+        "TIMETABLE_NTES_CONFLICT",
         "VISUAL_NUMBERS_UNAVAILABLE"
       ],
       "post_fetch_kind": "UNAVAILABLE"
@@ -115,7 +117,7 @@
     "category": "BOTH_ABSTAIN",
     "production_vs_shadow": "BOTH_UNKNOWN",
     "review_required": false,
-    "failure_reason": "NTES_STALE"
+    "failure_reason": "TIMETABLE_NTES_CONFLICT"
   },
   "ground_truth": {
     "reviewed": false,

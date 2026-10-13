@@ -1,6 +1,6 @@
 # Multi-Site Train Identity Shadow Lab — Weekly Comparison Report
 
-**Evaluation Week**: `2026-10-12` to `2026-10-19` &nbsp;|&nbsp; **Total Passages**: `16` &nbsp;|&nbsp; **Verified Ground Truth**: `3`
+**Evaluation Week**: `2026-10-12` to `2026-10-19` &nbsp;|&nbsp; **Total Passages**: `21` &nbsp;|&nbsp; **Verified Ground Truth**: `3`
 
 ---
 
@@ -8,8 +8,8 @@
 
 | Evaluation Metric | Count | Percentage |
 | :--- | :--- | :--- |
-| Total Candidate Passages | **16** | 100.0% |
-| Ground-Truth Reviewed Passages | **3** | 18.8% |
+| Total Candidate Passages | **21** | 100.0% |
+| Ground-Truth Reviewed Passages | **3** | 14.3% |
 | Production Correct (vs Ground Truth) | **0** | 0.0% |
 | Shadow T0 Correct (Visual + Schedule) | **1** | 33.3% |
 | Shadow T1 Correct (+ Near NTES) | **3** | 100.0% |
@@ -19,38 +19,39 @@
 
 | Taxonomy Category | Count | Meaning |
 | :--- | :--- | :--- |
-| `AGREE_UNVERIFIED` | **1** | 6.2% of total |
-| `BOTH_ABSTAIN` | **7** | 43.8% of total |
-| `DISAGREE_NO_GROUND_TRUTH` | **5** | 31.2% of total |
-| `PRODUCTION_ABSTAINS_SHADOW_CORRECT` | **3** | 18.8% of total |
+| `AGREE_UNVERIFIED` | **2** | 9.5% of total |
+| `BOTH_ABSTAIN` | **9** | 42.9% of total |
+| `DISAGREE_NO_GROUND_TRUTH` | **7** | 33.3% of total |
+| `PRODUCTION_ABSTAINS_SHADOW_CORRECT` | **2** | 9.5% of total |
+| `PRODUCTION_WRONG_SHADOW_CORRECT` | **1** | 4.8% of total |
 
 ## 3. Per-Site Isolation & Performance Breakdown (§22)
 
 | Site ID | Total Passages | Match Rate | Conflict Rate |
 | :--- | :--- | :--- | :--- |
-| `ndls_pf12_13` | **15** | 6.7% | 13.3% |
+| `ndls_pf12_13` | **20** | 10.0% | 5.0% |
 | `testx_pf1_2` | **1** | 0.0% | 0.0% |
 
 ## 4. Evidence Source Contribution Analysis (§21)
 
 | Evidence Source | Passages Utilizing | Contribution Role |
 | :--- | :--- | :--- |
-| Numeric OCR (Stable Pair) | **7** | Primary 5-digit number candidate extraction |
-| Train Name OCR | **5** | Non-numeric fallback & 4/6-number rake disambiguation |
+| Numeric OCR (Stable Pair) | **10** | Primary 5-digit number candidate extraction |
+| Train Name OCR | **6** | Non-numeric fallback & 4/6-number rake disambiguation |
 | Route Endpoints | **1** | Corroborating directional terminal evidence |
-| Site Timetable Match | **14** | Station schedule window and operating day validation |
-| Near-Passage NTES (T1) | **10** | Live platform and movement corroboration |
-| Post-Passage NTES (T2) | **3** | +180s departure and arrival persistence check |
+| Site Timetable Match | **20** | Station schedule window and operating day validation |
+| Near-Passage NTES (T1) | **13** | Live platform and movement corroboration |
+| Post-Passage NTES (T2) | **4** | +180s departure and arrival persistence check |
 
 ## 5. Failure Reason Taxonomy (§23)
 
 | Failure Reason | Occurrences | Root Cause |
 | :--- | :--- | :--- |
 | `MULTIPLE_LIVE_CANDIDATES` | **1** | Audited failure category |
-| `NTES_STALE` | **1** | Audited failure category |
-| `NTES_UNAVAILABLE` | **5** | Audited failure category |
+| `NTES_UNAVAILABLE` | **4** | Audited failure category |
 | `OCR_NUMBER_FAILURE` | **2** | Audited failure category |
-| `VISUAL_NTES_CONFLICT` | **1** | Audited failure category |
+| `TIMETABLE_NTES_CONFLICT` | **2** | Audited failure category |
+| `VISUAL_NTES_CONFLICT` | **2** | Audited failure category |
 
 ## 6. Representative Passage Walkthrough (§30)
 
@@ -92,8 +93,8 @@
 ### Passage 6: `PAS_SAFE_001` (ndls_pf12_13)
 - **Time & Platform**: `2026-10-13T17:20:00+05:30` | Platform `12`
 - **Visual Evidence**: Numbers `['12920']` | Name `[]`
-- **Decision Pipeline**: T0=`12314` → T1=`12314` → T2=`12314` (**PROVISIONAL**)
-- **Production vs Shadow**: Production=`12920` (HIGH) | Shadow=`12314` | Result=`CONFLICT`
+- **Decision Pipeline**: T0=`12920` → T1=`12920` → T2=`12920` (**PROVISIONAL**)
+- **Production vs Shadow**: Production=`12920` (HIGH) | Shadow=`12920` | Result=`MATCH`
 - **Ground Truth**: `Unreviewed` (Pending)
 
 ### Passage 7: `PAS_SCENARIO_01` (ndls_pf12_13)

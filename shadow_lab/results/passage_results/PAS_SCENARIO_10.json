@@ -115,6 +115,24 @@
     "version": "2026-10-13-validated-v1",
     "candidate_services": [
       {
+        "train_number": "12919",
+        "train_name": "",
+        "score": 4.5,
+        "evidence_list": [
+          "VISUAL_NUMBER_GE3_COACHES"
+        ],
+        "contradictions": []
+      },
+      {
+        "train_number": "12920",
+        "train_name": "",
+        "score": 4.5,
+        "evidence_list": [
+          "VISUAL_NUMBER_GE3_COACHES"
+        ],
+        "contradictions": []
+      },
+      {
         "train_number": "12314",
         "train_name": "NDLS-SEALDAH RAJ",
         "score": 3.0,
@@ -167,9 +185,9 @@
   "shadow_result": {
     "T0": {
       "train_number": null,
-      "status": "CONFLICT",
+      "status": "AMBIGUOUS",
       "reason_codes": [
-        "CONFLICT_VISUAL_AND_NTES_DISAGREE",
+        "AMBIGUOUS_MULTIPLE_EQUAL_CANDIDATES",
         "NTES_UNAVAILABLE_OR_TIMED_OUT",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
         "VISUAL_PAIR_CONFIRMED_GE3_COACHES"
@@ -179,9 +197,10 @@
       "train_number": null,
       "status": "CONFLICT",
       "reason_codes": [
-        "CONFLICT_VISUAL_AND_NTES_DISAGREE",
         "NTES_CORROBORATED_FRESH_BOARD",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
+        "TIMETABLE_NTES_CONFLICT",
+        "VISUAL_NTES_CONFLICT",
         "VISUAL_PAIR_CONFIRMED_GE3_COACHES"
       ]
     },
@@ -189,9 +208,10 @@
       "train_number": null,
       "status": "CONFLICT",
       "reason_codes": [
-        "CONFLICT_VISUAL_AND_NTES_DISAGREE",
         "NTES_CORROBORATED_FRESH_BOARD",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
+        "TIMETABLE_NTES_CONFLICT",
+        "VISUAL_NTES_CONFLICT",
         "VISUAL_PAIR_CONFIRMED_GE3_COACHES"
       ],
       "post_fetch_kind": "UNAVAILABLE"

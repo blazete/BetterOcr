@@ -599,6 +599,16 @@ def cmd_weekly_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_run_delayed_worker(args: argparse.Namespace) -> int:
+    collector = ShadowCollector()
+    if args.passage_id:
+        bundles = collector.run_delayed_verification(passage_id=args.passage_id)
+    else:
+        bundles = collector.run_delayed_verification()
+    print(f"[PASS] Processed {len(bundles)} delayed NTES verifications.")
+    return 0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="python -m shadow_identity.cli",
@@ -638,6 +648,10 @@ def main() -> None:
     p_rgt.add_argument("--source", default="manual_station_confirmation", help="Verification source")
     p_rgt.add_argument("--notes", default=None, help="Review notes")
 
+    # run-delayed-worker (§4)
+    p_wrk = subparsers.add_parser("run-delayed-worker", help="Run delayed NTES verification worker")
+    p_wrk.add_argument("--passage-id", default=None, help="Specific passage ID to verify")
+
     # daily-report (§29)
     p_day = subparsers.add_parser("daily-report", help="Generate daily comparison report")
     p_day.add_argument("--date", required=True, help="Date YYYY-MM-DD")
@@ -670,6 +684,7 @@ def main() -> None:
         "evaluate-passage": cmd_evaluate_passage,
         "import-passage": cmd_import_passage,
         "record-ground-truth": cmd_record_ground_truth,
+        "run-delayed-worker": cmd_run_delayed_worker,
         "daily-report": cmd_daily_report,
         "weekly-report": cmd_weekly_report,
         "verify-no-writes": cmd_verify_no_writes,

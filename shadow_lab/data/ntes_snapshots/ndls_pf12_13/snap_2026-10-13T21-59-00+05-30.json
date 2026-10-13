@@ -1,0 +1,25 @@
+{
+  "site_id": "ndls_pf12_13",
+  "station_code": "NDLS",
+  "requested_at": "2026-10-13T21:59:00+05:30",
+  "fetched_at": "2026-10-13T21:59:00+05:30",
+  "window_hr": 2,
+  "available": true,
+  "from_cache": false,
+  "stale_fallback": false,
+  "snapshot_age_seconds_at_decision": 0.0,
+  "source": "archive",
+  "trains": [
+    {
+      "train_number": "12280",
+      "train_name": "TAJ EXP",
+      "platform": "12",
+      "time_min": null,
+      "time_raw": "",
+      "is_originating": false,
+      "is_terminating": false,
+      "dep_min": null
+    }
+  ],
+  "raw_hash": "chk_delayed_180"
+}

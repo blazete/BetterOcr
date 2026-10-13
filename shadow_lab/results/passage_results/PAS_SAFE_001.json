@@ -75,6 +75,15 @@
     "version": "2026-10-13-validated-v1",
     "candidate_services": [
       {
+        "train_number": "12920",
+        "train_name": "",
+        "score": 4.5,
+        "evidence_list": [
+          "VISUAL_NUMBER_GE3_COACHES"
+        ],
+        "contradictions": []
+      },
+      {
         "train_number": "12314",
         "train_name": "NDLS-SEALDAH RAJ",
         "score": 3.0,
@@ -102,36 +111,39 @@
   },
   "shadow_result": {
     "T0": {
-      "train_number": "12314",
+      "train_number": "12920",
       "status": "PROVISIONAL",
       "reason_codes": [
         "NTES_UNAVAILABLE_OR_TIMED_OUT",
-        "VISUAL_PAIR_PROVISIONAL_LT3_COACHES"
+        "VISUAL_PAIR_PROVISIONAL_LT3_COACHES",
+        "VISUAL_TIMETABLE_CONFLICT"
       ]
     },
     "T1": {
-      "train_number": "12314",
+      "train_number": "12920",
       "status": "PROVISIONAL",
       "reason_codes": [
         "NTES_UNAVAILABLE_OR_TIMED_OUT",
-        "VISUAL_PAIR_PROVISIONAL_LT3_COACHES"
+        "VISUAL_PAIR_PROVISIONAL_LT3_COACHES",
+        "VISUAL_TIMETABLE_CONFLICT"
       ]
     },
     "T2": {
-      "train_number": "12314",
+      "train_number": "12920",
       "status": "PROVISIONAL",
       "reason_codes": [
         "NTES_UNAVAILABLE_OR_TIMED_OUT",
-        "VISUAL_PAIR_PROVISIONAL_LT3_COACHES"
+        "VISUAL_PAIR_PROVISIONAL_LT3_COACHES",
+        "VISUAL_TIMETABLE_CONFLICT"
       ],
       "post_fetch_kind": "UNAVAILABLE"
     }
   },
   "comparison": {
-    "category": "DISAGREE_NO_GROUND_TRUTH",
-    "production_vs_shadow": "CONFLICT",
-    "review_required": true,
-    "failure_reason": "NTES_UNAVAILABLE"
+    "category": "AGREE_UNVERIFIED",
+    "production_vs_shadow": "MATCH",
+    "review_required": false,
+    "failure_reason": null
   },
   "ground_truth": {
     "reviewed": false,

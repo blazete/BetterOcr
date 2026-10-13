@@ -24,40 +24,65 @@ def categorize_comparison(
     """
     Categorize comparison into mandatory taxonomy:
       BOTH_CORRECT, PRODUCTION_ONLY_CORRECT, SHADOW_ONLY_CORRECT, BOTH_WRONG,
-      PRODUCTION_ABSTAINS_SHADOW_CORRECT, SHADOW_ABSTAINS_PRODUCTION_CORRECT,
-      BOTH_ABSTAIN, DISAGREE_NO_GROUND_TRUTH, AGREE_UNVERIFIED,
+      PRODUCTION_WRONG_SHADOW_CORRECT, PRODUCTION_UNKNOWN_SHADOW_CORRECT,
+      SHADOW_ABSTAINS_PRODUCTION_CORRECT, BOTH_ABSTAIN,
+      DISAGREE_NO_GROUND_TRUTH, AGREE_UNVERIFIED,
       MISSING_SHADOW_DATA, MISSING_PRODUCTION_DATA, INVALID_OR_AMBIGUOUS_JOIN.
     """
-    prod_has = bool(prod_num and prod_conf in ("HIGH", "MEDIUM"))
-    shadow_has = bool(shadow_num and shadow_status in ("CONFIRMED", "PROVISIONAL"))
+    prod_clean = prod_num.strip() if (prod_num and str(prod_num).strip()) else None
+    prod_has = bool(
+        prod_clean
+        and prod_clean.upper() not in ("NONE", "UNKNOWN", "NULL", "-", "<NONE>", "")
+    )
+
+    shadow_clean = shadow_num.strip() if (shadow_num and str(shadow_num).strip()) else None
+    shadow_has = bool(
+        shadow_clean
+        and shadow_clean.upper() not in ("NONE", "UNKNOWN", "NULL", "-", "<NONE>", "")
+        and shadow_status in ("CONFIRMED", "PROVISIONAL")
+    )
 
     # When ground truth is unknown
     if not ground_truth:
-        if prod_num and shadow_num and prod_num == shadow_num:
-            return "AGREE_UNVERIFIED", False
-        elif prod_has and shadow_has and prod_num != shadow_num:
-            return "DISAGREE_NO_GROUND_TRUTH", True
+        if prod_has and shadow_has:
+            if prod_clean == shadow_clean:
+                return "AGREE_UNVERIFIED", False
+            else:
+                return "DISAGREE_NO_GROUND_TRUTH", True
         elif not prod_has and not shadow_has:
             return "BOTH_ABSTAIN", False
         else:
             return "DISAGREE_NO_GROUND_TRUTH", True
 
     gt = ground_truth.strip()
-    prod_corr = (prod_num == gt) if prod_has else False
-    shadow_corr = (shadow_num == gt) if shadow_has else False
+    prod_corr = bool(prod_has and prod_clean == gt)
+    prod_wrong = bool(prod_has and prod_clean != gt)
+    prod_unknown = not prod_has
+
+    shadow_corr = bool(shadow_has and shadow_clean == gt)
+    shadow_wrong = bool(shadow_has and shadow_clean != gt)
+    shadow_unknown = not shadow_has
 
     if prod_corr and shadow_corr:
         return "BOTH_CORRECT", False
-    elif prod_corr and not shadow_has:
+    elif prod_corr and shadow_unknown:
         return "SHADOW_ABSTAINS_PRODUCTION_CORRECT", True
-    elif prod_corr and not shadow_corr:
+    elif prod_corr and shadow_wrong:
         return "PRODUCTION_ONLY_CORRECT", True
-    elif shadow_corr and not prod_has:
-        return "PRODUCTION_ABSTAINS_SHADOW_CORRECT", False
+    elif prod_wrong and shadow_corr:
+        return "PRODUCTION_WRONG_SHADOW_CORRECT", False
+    elif prod_unknown and shadow_corr:
+        return "PRODUCTION_UNKNOWN_SHADOW_CORRECT", False
     elif shadow_corr and not prod_corr:
         return "SHADOW_ONLY_CORRECT", False
-    elif not prod_has and not shadow_has:
+    elif prod_wrong and shadow_wrong:
+        return "BOTH_WRONG", True
+    elif prod_unknown and shadow_unknown:
         return "BOTH_ABSTAIN", False
+    elif prod_wrong and shadow_unknown:
+        return "PRODUCTION_WRONG_SHADOW_ABSTAINS", True
+    elif prod_unknown and shadow_wrong:
+        return "PRODUCTION_ABSTAINS_SHADOW_WRONG", True
     else:
         return "BOTH_WRONG", True
 

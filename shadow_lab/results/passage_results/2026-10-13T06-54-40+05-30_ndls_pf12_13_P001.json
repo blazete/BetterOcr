@@ -180,7 +180,7 @@
     }
   },
   "comparison": {
-    "category": "PRODUCTION_ABSTAINS_SHADOW_CORRECT",
+    "category": "PRODUCTION_WRONG_SHADOW_CORRECT",
     "production_vs_shadow": "CONFLICT",
     "review_required": false,
     "failure_reason": "OCR_NUMBER_FAILURE"

@@ -141,8 +141,15 @@ class SiteRegistry:
             )
         return self.sites[site_id]
 
+    def get_site_config(self, site_id: str) -> Dict[str, Any]:
+        return self.get_site(site_id)
+
     def get_aliases(self, site_id: str) -> Dict[str, Any]:
         return self.aliases.get(site_id, {})
 
+    def get_site_aliases(self, site_id: str) -> Dict[str, Any]:
+        return self.get_aliases(site_id)
+
     def list_sites(self) -> List[str]:
         return sorted(list(self.sites.keys()))
+

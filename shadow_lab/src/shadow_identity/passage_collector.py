@@ -42,18 +42,22 @@ from shadow_identity.reason_codes import (
     FT_OCR_NUMBER_FAILURE,
     FT_SITE_CONFIG_ERROR,
     FT_TIMETABLE_AMBIGUITY,
+    FT_TIMETABLE_NTES_CONFLICT,
     FT_TIMETABLE_STALE,
     FT_UNKNOWN,
     FT_VISUAL_NTES_CONFLICT,
+    FT_VISUAL_TIMETABLE_CONFLICT,
     RC_AMBIGUOUS_MULTI_CANDIDATE,
     RC_NTES_CORROBORATED_STALE,
     RC_NTES_UNAVAILABLE,
     RC_NTES_WRONG_STATION_REJECTED,
     RC_SCHEDULE_OUTSIDE_WINDOW,
     RC_SCHEDULE_UNAVAILABLE,
+    RC_TIMETABLE_NTES_CONFLICT,
     RC_VISUAL_BOARD_NOT_NUMBERED,
     RC_VISUAL_NTES_CONFLICT,
     RC_VISUAL_NUMBERS_UNAVAILABLE,
+    RC_VISUAL_TIMETABLE_CONFLICT,
 )
 from shadow_identity.text_normalization import is_endpoint_text, is_negative_class
 from shadow_identity.timetable_importer import TimetableImporter
@@ -88,6 +92,9 @@ class ShadowCollector:
             self.weekly_dir,
         ):
             d.mkdir(parents=True, exist_ok=True)
+
+        from shadow_identity.delayed_ntes_worker import DelayedNtesVerificationWorker
+        self.worker = DelayedNtesVerificationWorker(shadow_lab_root=self.root)
 
     def import_production_passage(
         self,
@@ -361,6 +368,10 @@ class ShadowCollector:
         if shadow_status in ("UNKNOWN", "CONFLICT", "AMBIGUOUS") or prod_vs_shadow == "CONFLICT":
             if RC_VISUAL_NTES_CONFLICT in dec_t2.reason_codes:
                 failure_reason = FT_VISUAL_NTES_CONFLICT
+            elif RC_VISUAL_TIMETABLE_CONFLICT in dec_t2.reason_codes:
+                failure_reason = FT_VISUAL_TIMETABLE_CONFLICT
+            elif RC_TIMETABLE_NTES_CONFLICT in dec_t2.reason_codes:
+                failure_reason = FT_TIMETABLE_NTES_CONFLICT
             elif RC_VISUAL_BOARD_NOT_NUMBERED in dec_t2.reason_codes and not consensus.train_name_candidates:
                 failure_reason = FT_BOARD_NOT_NUMBERED
             elif RC_AMBIGUOUS_MULTI_CANDIDATE in dec_t2.reason_codes:
@@ -431,7 +442,23 @@ class ShadowCollector:
         with open(res_json_path, "w", encoding="utf-8") as f:
             json.dump(bundle.to_dict(), f, indent=2)
 
+        # 11. Enqueue for delayed NTES verification if post-passage snapshot is not yet present (§4)
+        if ntes_after is None:
+            self.worker.enqueue_passage(
+                passage_id=passage_id,
+                site_id=site_id,
+                passage_end_time=passage_end,
+            )
+
         return bundle
+
+    def run_delayed_verification(self, passage_id: Optional[str] = None) -> List[PassageBundle]:
+        """Process delayed NTES verification queue."""
+        if passage_id:
+            res = self.worker.process_passage(passage_id)
+            return [res] if res else []
+        return self.worker.process_all_pending()
+
 
     def record_ground_truth(
         self,

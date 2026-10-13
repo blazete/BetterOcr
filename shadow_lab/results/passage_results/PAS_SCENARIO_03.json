@@ -235,12 +235,40 @@
       {
         "train_number": "12560",
         "train_name": "NDLS-BSBS (SHIV GANGA EXP.)",
-        "score": 11.0,
+        "score": 15.5,
         "evidence_list": [
           "TIMETABLE_EXACT_NUMBER_MATCH",
           "TIMETABLE_NAME_MATCH_100PCT",
           "TIMETABLE_TIME_WINDOW_DELTA_0MIN",
-          "TIMETABLE_PLATFORM_12"
+          "TIMETABLE_PLATFORM_12",
+          "VISUAL_NUMBER_GE3_COACHES"
+        ],
+        "contradictions": []
+      },
+      {
+        "train_number": "12559",
+        "train_name": "SHIV GANGA",
+        "score": 4.5,
+        "evidence_list": [
+          "VISUAL_NUMBER_GE3_COACHES"
+        ],
+        "contradictions": []
+      },
+      {
+        "train_number": "12451",
+        "train_name": "SHIV GANGA",
+        "score": 4.5,
+        "evidence_list": [
+          "VISUAL_NUMBER_GE3_COACHES"
+        ],
+        "contradictions": []
+      },
+      {
+        "train_number": "12452",
+        "train_name": "SHIV GANGA",
+        "score": 4.5,
+        "evidence_list": [
+          "VISUAL_NUMBER_GE3_COACHES"
         ],
         "contradictions": []
       },

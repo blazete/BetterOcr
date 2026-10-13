@@ -77,11 +77,12 @@
       {
         "train_number": "12314",
         "train_name": "NDLS-SEALDAH RAJ",
-        "score": 7.0,
+        "score": 11.5,
         "evidence_list": [
           "TIMETABLE_EXACT_NUMBER_MATCH",
           "TIMETABLE_TIME_WINDOW_DELTA_45MIN",
-          "TIMETABLE_PLATFORM_13"
+          "TIMETABLE_PLATFORM_13",
+          "VISUAL_NUMBER_GE3_COACHES"
         ],
         "contradictions": []
       }
