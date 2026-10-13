@@ -452,12 +452,23 @@ class ShadowCollector:
 
         return bundle
 
-    def run_delayed_verification(self, passage_id: Optional[str] = None) -> List[PassageBundle]:
-        """Process delayed NTES verification queue."""
+    def run_delayed_verification(
+        self,
+        passage_id: Optional[str] = None,
+        due_only: bool = True,
+    ) -> List[PassageBundle]:
+        """
+        Process delayed NTES verification queue.
+        By default processes only tasks whose scheduled_verify_at has arrived (due_only=True)
+        to prevent executing checks before +180s in live trials (§6, §7).
+        """
         if passage_id:
             res = self.worker.process_passage(passage_id)
             return [res] if res else []
+        if due_only:
+            return self.worker.process_due()
         return self.worker.process_all_pending()
+
 
 
     def record_ground_truth(

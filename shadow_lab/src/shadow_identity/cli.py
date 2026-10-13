@@ -601,12 +601,25 @@ def cmd_weekly_report(args: argparse.Namespace) -> int:
 
 def cmd_run_delayed_worker(args: argparse.Namespace) -> int:
     collector = ShadowCollector()
+    if args.service:
+        print(f"[START] Starting Delayed NTES Verification Worker service (poll interval: {args.poll_interval}s)...")
+        print("[INFO] Press Ctrl+C to terminate.")
+        try:
+            total = collector.worker.run_worker_loop(poll_interval_s=args.poll_interval)
+            print(f"[STOP] Worker service stopped. Total processed: {total}")
+        except KeyboardInterrupt:
+            print("\n[STOP] Worker service interrupted by user.")
+        return 0
+
     if args.passage_id:
         bundles = collector.run_delayed_verification(passage_id=args.passage_id)
     else:
-        bundles = collector.run_delayed_verification()
+        # Crucial for real trial: process only tasks whose scheduled_verify_at has arrived (§6, §7)
+        due_only = not args.force_all_pending
+        bundles = collector.run_delayed_verification(due_only=due_only)
     print(f"[PASS] Processed {len(bundles)} delayed NTES verifications.")
     return 0
+
 
 
 def main() -> None:
@@ -648,9 +661,13 @@ def main() -> None:
     p_rgt.add_argument("--source", default="manual_station_confirmation", help="Verification source")
     p_rgt.add_argument("--notes", default=None, help="Review notes")
 
-    # run-delayed-worker (§4)
+    # run-delayed-worker (§4, §6, §7)
     p_wrk = subparsers.add_parser("run-delayed-worker", help="Run delayed NTES verification worker")
     p_wrk.add_argument("--passage-id", default=None, help="Specific passage ID to verify")
+    p_wrk.add_argument("--service", action="store_true", help="Run as continuous worker loop/service calling process_due()")
+    p_wrk.add_argument("--poll-interval", type=float, default=5.0, help="Polling interval in seconds for worker loop (default: 5.0)")
+    p_wrk.add_argument("--force-all-pending", action="store_true", help="Force processing all pending tasks immediately (debugging only; do not use in live trials)")
+
 
     # daily-report (§29)
     p_day = subparsers.add_parser("daily-report", help="Generate daily comparison report")

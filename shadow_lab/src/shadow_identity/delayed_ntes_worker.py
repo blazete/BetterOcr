@@ -65,6 +65,14 @@ from shadow_identity.timetable_importer import TimetableImporter
 logger = logging.getLogger("shadow_identity.delayed_ntes_worker")
 
 
+def _to_naive_utc(dt: datetime) -> datetime:
+    """Normalize datetime to naive UTC for safe cross-timezone comparisons."""
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
+
+
+
 @dataclass
 class DelayedVerificationTask:
     passage_id: str
@@ -86,6 +94,7 @@ class DelayedNtesVerificationWorker:
         shadow_lab_root: Optional[Path] = None,
         default_delay_seconds: float = 180.0,
         snapshot_provider: Optional[Callable[[str, str], Optional[NtesSnapshot]]] = None,
+        queue_file: Optional[Path] = None,
     ):
         if shadow_lab_root is None:
             self.root = Path(__file__).resolve().parents[2]
@@ -93,11 +102,21 @@ class DelayedNtesVerificationWorker:
             self.root = Path(shadow_lab_root)
 
         self.default_delay_seconds = default_delay_seconds
-        self.snapshot_provider = snapshot_provider
+        self.root = self.root.resolve()
+
+        if snapshot_provider is not None:
+            self.snapshot_provider = snapshot_provider
+            self.adapter = None
+        else:
+            from shadow_identity.ntes_adapter import ArdsNtesAdapter
+            self.adapter = ArdsNtesAdapter(shadow_lab_root=self.root)
+            self.snapshot_provider = self.adapter.get_snapshot
+
         self.data_dir = self.root / "data"
         self.passages_dir = self.data_dir / "passages"
         self.ntes_dir = self.data_dir / "ntes_snapshots"
-        self.queue_file = self.data_dir / "delayed_verification_queue.json"
+        self.queue_file = Path(queue_file) if queue_file else (self.data_dir / "delayed_verification_queue.json")
+
 
         self.passages_dir.mkdir(parents=True, exist_ok=True)
         self.ntes_dir.mkdir(parents=True, exist_ok=True)
@@ -179,7 +198,7 @@ class DelayedNtesVerificationWorker:
         """
         if self.snapshot_provider is not None:
             snap = self.snapshot_provider(site_id, passage_end_time)
-            if snap:
+            if snap and not getattr(snap, "from_cache", False):
                 self.save_snapshot_locally(site_id, snap)
             return snap
 
@@ -215,6 +234,12 @@ class DelayedNtesVerificationWorker:
         target_dir.mkdir(parents=True, exist_ok=True)
         fname = f"snap_{snap.fetched_at.replace(':', '-').replace('.', '-') if snap.fetched_at else int(time.time())}.json"
         out_path = target_dir / fname
+
+        resolved_str = str(out_path.resolve())
+        root_str = str(self.root.resolve())
+        if not resolved_str.startswith(root_str) or "ARDS-main" in resolved_str:
+            raise PermissionError(f"Security violation: attempt to write outside shadow_lab: {out_path}")
+
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(asdict(snap), f, indent=2)
         return out_path
@@ -253,7 +278,8 @@ class DelayedNtesVerificationWorker:
             snapshot = self.fetch_delayed_snapshot(site_id, passage_end)
 
         if snapshot is not None:
-            self.save_snapshot_locally(site_id, snapshot)
+            if not getattr(snapshot, "from_cache", False):
+                self.save_snapshot_locally(site_id, snapshot)
             b_dict["ntes"]["post_passage_snapshot"] = asdict(snapshot)
 
         # Step 3: Rerun Stage T2
@@ -290,14 +316,27 @@ class DelayedNtesVerificationWorker:
         )
 
         vis_dict = b_dict.get("visual", {})
-        num_cands = [
-            c if isinstance(c, NumberCandidate) else NumberCandidate(**c)
-            for c in vis_dict.get("service_numbers", [])
-        ]
-        name_cands = [
-            c if isinstance(c, NameCandidate) else NameCandidate(**c)
-            for c in vis_dict.get("train_name_candidates", [])
-        ]
+        num_cands = []
+        for c in vis_dict.get("service_numbers", []):
+            if isinstance(c, NumberCandidate):
+                num_cands.append(c)
+            elif isinstance(c, dict):
+                n_str = c.get("number") or c.get("train_number") or ""
+                coaches = c.get("distinct_coaches") or c.get("coach_count") or 1
+                obs = c.get("total_observations") or 1
+                conf = c.get("mean_confidence") or c.get("score") or 0.90
+                num_cands.append(NumberCandidate(number=n_str, distinct_coaches=coaches, total_observations=obs, mean_confidence=conf))
+
+        name_cands = []
+        for c in vis_dict.get("train_name_candidates", []):
+            if isinstance(c, NameCandidate):
+                name_cands.append(c)
+            elif isinstance(c, dict):
+                nm_str = c.get("name") or c.get("train_name") or ""
+                coaches = c.get("distinct_coaches") or c.get("coach_count") or 1
+                obs = c.get("total_observations") or 1
+                name_cands.append(NameCandidate(name=nm_str, distinct_coaches=coaches, total_observations=obs))
+
         consensus = PassageVisualConsensus(
             service_number_candidates=num_cands,
             stable_pair=vis_dict.get("stable_pair", []),
@@ -426,18 +465,22 @@ class DelayedNtesVerificationWorker:
         return PassageBundle(**b_dict)
 
     def process_due(self, now_dt: Optional[datetime] = None) -> List[PassageBundle]:
-        """Process all tasks whose scheduled verify time has arrived."""
+        """
+        Process all tasks whose scheduled verify time has arrived (§6).
+        Only processes tasks whose scheduled_verify_at <= cur.
+        """
         cur = now_dt or datetime.now()
+        cur_norm = _to_naive_utc(cur)
         due: List[DelayedVerificationTask] = []
         with self._lock:
             for t in self._tasks.values():
                 if t.status == "PENDING":
                     try:
                         s_dt = datetime.fromisoformat(t.scheduled_verify_at)
-                        if s_dt <= cur:
+                        if _to_naive_utc(s_dt) <= cur_norm:
                             due.append(t)
-                    except Exception:
-                        due.append(t)
+                    except Exception as e:
+                        logger.warning(f"Error parsing scheduled_verify_at for task {t.passage_id}: {e}")
 
         results: List[PassageBundle] = []
         for task in due:
@@ -447,7 +490,10 @@ class DelayedNtesVerificationWorker:
         return results
 
     def process_all_pending(self) -> List[PassageBundle]:
-        """Immediately process all pending verification tasks."""
+        """
+        Immediately process all pending verification tasks.
+        WARNING: Do not use for the real operational trial, as it executes checks before +180s.
+        """
         pending = self.get_pending_tasks()
         results: List[PassageBundle] = []
         for task in pending:
@@ -455,3 +501,64 @@ class DelayedNtesVerificationWorker:
             if res:
                 results.append(res)
         return results
+
+    def run_worker_loop(
+        self,
+        poll_interval_s: float = 5.0,
+        stop_event: Optional[threading.Event] = None,
+        max_iterations: Optional[int] = None,
+    ) -> int:
+        """
+        Periodic worker loop (§6).
+        Periodically calls process_due() and only processes tasks whose
+        scheduled_verify_at has passed.
+        Never calls process_all_pending() to avoid executing checks before +180 seconds.
+        """
+        logger.info(f"Starting DelayedNtesVerificationWorker loop (interval: {poll_interval_s}s)")
+        iterations = 0
+        total_processed = 0
+
+        while stop_event is None or not stop_event.is_set():
+            try:
+                processed = self.process_due()
+                total_processed += len(processed)
+            except Exception as e:
+                logger.error(f"Error in delayed worker loop cycle: {e}")
+
+            iterations += 1
+            if max_iterations is not None and iterations >= max_iterations:
+                break
+
+            if stop_event is not None:
+                stop_event.wait(poll_interval_s)
+            else:
+                time.sleep(poll_interval_s)
+
+        logger.info(f"DelayedNtesVerificationWorker loop stopped. Total processed: {total_processed}")
+        return total_processed
+
+    def start_service(self, poll_interval_s: float = 5.0) -> None:
+        """Start the worker loop service in a background daemon thread."""
+        with self._lock:
+            if self._running:
+                return
+            self._running = True
+            self._stop_event = threading.Event()
+            self._thread = threading.Thread(
+                target=self.run_worker_loop,
+                args=(poll_interval_s, self._stop_event),
+                name="delayed-ntes-worker",
+                daemon=True,
+            )
+            self._thread.start()
+
+    def stop_service(self, timeout_s: float = 5.0) -> None:
+        """Stop background worker service."""
+        with self._lock:
+            if not self._running:
+                return
+            self._running = False
+            if hasattr(self, "_stop_event") and self._stop_event:
+                self._stop_event.set()
+        if self._thread:
+            self._thread.join(timeout=timeout_s)
