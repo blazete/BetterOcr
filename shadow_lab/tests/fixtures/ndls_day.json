@@ -1,0 +1,181 @@
+{
+  "passage": {
+    "schema_version": "1.0",
+    "site_id": "ndls_pf12_13",
+    "installation_id": "ndls_ards_01",
+    "passage_id": "PAS_20261013_1720_NDLS_001",
+    "camera_id": "side_a",
+    "passage_start": "2026-10-13T17:20:00+05:30",
+    "passage_end": "2026-10-13T17:22:00+05:30",
+    "possible_platforms": ["12", "13"],
+    "observed_platform": null,
+    "direction": "UP",
+    "source_files": [
+      {
+        "uri": "fixtures/video_008.mp4",
+        "sha256": "mock_sha256_video_008"
+      }
+    ],
+    "production_inspection_id": "INSP_008_NDLS",
+    "production_readonly_result": {
+      "train_number": "12920",
+      "confidence": "HIGH",
+      "source": "production_ards",
+      "recorded_at": "2026-10-13T17:22:15+05:30"
+    }
+  },
+  "visual_evidence": {
+    "passage_id": "PAS_20261013_1720_NDLS_001",
+    "ocr_model_version": "paddle-v3-shadow",
+    "preprocessing_profile": "upscale_2x",
+    "per_observation": [
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 100,
+        "timestamp_offset_ms": 4000,
+        "raw_text": "12920",
+        "normalized_text": "12920",
+        "entity_type": "SERVICE_NUMBER",
+        "bbox": [10, 20, 100, 50],
+        "ocr_confidence": 0.94
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 220,
+        "timestamp_offset_ms": 8800,
+        "raw_text": "12920",
+        "normalized_text": "12920",
+        "entity_type": "SERVICE_NUMBER",
+        "bbox": [12, 22, 102, 52],
+        "ocr_confidence": 0.96
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 350,
+        "timestamp_offset_ms": 14000,
+        "raw_text": "12920",
+        "normalized_text": "12920",
+        "entity_type": "SERVICE_NUMBER",
+        "bbox": [10, 20, 100, 50],
+        "ocr_confidence": 0.92
+      },
+      {
+        "coach_segment_id": "C04",
+        "frame_id": 480,
+        "timestamp_offset_ms": 19200,
+        "raw_text": "12919",
+        "normalized_text": "12919",
+        "entity_type": "SERVICE_NUMBER",
+        "bbox": [10, 20, 100, 50],
+        "ocr_confidence": 0.91
+      },
+      {
+        "coach_segment_id": "C05",
+        "frame_id": 610,
+        "timestamp_offset_ms": 24400,
+        "raw_text": "12919",
+        "normalized_text": "12919",
+        "entity_type": "SERVICE_NUMBER",
+        "bbox": [10, 20, 100, 50],
+        "ocr_confidence": 0.93
+      },
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 105,
+        "timestamp_offset_ms": 4200,
+        "raw_text": "MALWA EXPRESS",
+        "normalized_text": "MALWA EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [10, 60, 250, 90],
+        "ocr_confidence": 0.95
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 225,
+        "timestamp_offset_ms": 9000,
+        "raw_text": "MALWA EXPRESS",
+        "normalized_text": "MALWA EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [10, 60, 250, 90],
+        "ocr_confidence": 0.97
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 355,
+        "timestamp_offset_ms": 14200,
+        "raw_text": "MALWA EXPRESS",
+        "normalized_text": "MALWA EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [10, 60, 250, 90],
+        "ocr_confidence": 0.96
+      }
+    ],
+    "passage_consensus": {
+      "service_number_candidates": [
+        {"number": "12920", "distinct_coaches": 3},
+        {"number": "12919", "distinct_coaches": 2}
+      ],
+      "stable_pair": ["12919", "12920"],
+      "train_name_candidates": [
+        {"name": "MALWA EXPRESS", "distinct_coaches": 3}
+      ],
+      "endpoint_candidates": [],
+      "number_board_type": "TWO_NUMBER",
+      "numeric_status": "PAIR_PROVISIONAL"
+    }
+  },
+  "ntes_before": {
+    "site_id": "ndls_pf12_13",
+    "station_code": "NDLS",
+    "requested_at": "2026-10-13T17:19:00+05:30",
+    "fetched_at": "2026-10-13T17:19:05+05:30",
+    "window_hr": 2,
+    "available": true,
+    "from_cache": false,
+    "stale_fallback": false,
+    "snapshot_age_seconds_at_decision": 175.0,
+    "source": "archive",
+    "trains": [
+      {
+        "train_number": "12920",
+        "train_name": "MALWA EXPRESS",
+        "platform": "12",
+        "time_min": 1040,
+        "time_raw": "17:20",
+        "is_originating": false,
+        "is_terminating": false
+      }
+    ],
+    "raw_hash": "sha256_ntes_before_ndls_001"
+  },
+  "ntes_after": {
+    "site_id": "ndls_pf12_13",
+    "station_code": "NDLS",
+    "requested_at": "2026-10-13T17:25:00+05:30",
+    "fetched_at": "2026-10-13T17:25:05+05:30",
+    "window_hr": 2,
+    "available": true,
+    "from_cache": false,
+    "stale_fallback": false,
+    "snapshot_age_seconds_at_decision": 0.0,
+    "source": "archive",
+    "trains": [
+      {
+        "train_number": "12920",
+        "train_name": "MALWA EXPRESS",
+        "platform": "12",
+        "time_min": 1040,
+        "time_raw": "17:20",
+        "is_originating": false,
+        "is_terminating": false
+      }
+    ],
+    "raw_hash": "sha256_ntes_after_ndls_001"
+  },
+  "ground_truth": {
+    "actual_train_number": "12920",
+    "actual_train_name": "MALWA EXPRESS",
+    "reviewer": "human_expert",
+    "quality": "VERIFIED"
+  }
+}

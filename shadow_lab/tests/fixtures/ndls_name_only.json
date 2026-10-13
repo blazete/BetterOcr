@@ -1,0 +1,150 @@
+{
+  "passage": {
+    "schema_version": "1.0",
+    "site_id": "ndls_pf12_13",
+    "installation_id": "ndls_ards_01",
+    "passage_id": "PAS_20261013_2155_NDLS_006",
+    "camera_id": "side_a",
+    "passage_start": "2026-10-13T21:55:00+05:30",
+    "passage_end": "2026-10-13T21:57:00+05:30",
+    "possible_platforms": ["12", "13"],
+    "observed_platform": null,
+    "direction": "DN",
+    "source_files": [
+      {
+        "uri": "fixtures/video_006.mp4",
+        "sha256": "mock_sha256_video_006"
+      }
+    ],
+    "production_inspection_id": "INSP_006_NDLS",
+    "production_readonly_result": {
+      "train_number": null,
+      "confidence": "LOW",
+      "source": "production_ards",
+      "recorded_at": "2026-10-13T21:57:15+05:30"
+    }
+  },
+  "visual_evidence": {
+    "passage_id": "PAS_20261013_2155_NDLS_006",
+    "ocr_model_version": "paddle-v3-shadow",
+    "preprocessing_profile": "gamma_0.7_upscale_2x",
+    "per_observation": [
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 110,
+        "timestamp_offset_ms": 4400,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [15, 65, 260, 95],
+        "ocr_confidence": 0.96
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 240,
+        "timestamp_offset_ms": 9600,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [15, 65, 260, 95],
+        "ocr_confidence": 0.94
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 370,
+        "timestamp_offset_ms": 14800,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [15, 65, 260, 95],
+        "ocr_confidence": 0.97
+      },
+      {
+        "coach_segment_id": "C04",
+        "frame_id": 500,
+        "timestamp_offset_ms": 20000,
+        "raw_text": "TAJ EXPRESS",
+        "normalized_text": "TAJ EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [15, 65, 260, 95],
+        "ocr_confidence": 0.95
+      },
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 115,
+        "timestamp_offset_ms": 4600,
+        "raw_text": "NEW DELHI - VGL JHANSI",
+        "normalized_text": "NEW DELHI - VGL JHANSI",
+        "entity_type": "ENDPOINT",
+        "bbox": [20, 105, 300, 135],
+        "ocr_confidence": 0.92
+      }
+    ],
+    "passage_consensus": {
+      "service_number_candidates": [],
+      "stable_pair": [],
+      "train_name_candidates": [
+        {"name": "TAJ EXPRESS", "distinct_coaches": 4}
+      ],
+      "endpoint_candidates": [
+        {"endpoint": "NEW DELHI - VGL JHANSI", "distinct_coaches": 1}
+      ],
+      "number_board_type": "NOT_NUMBERED",
+      "numeric_status": "NOT_NUMBERED"
+    }
+  },
+  "ntes_before": {
+    "site_id": "ndls_pf12_13",
+    "station_code": "NDLS",
+    "requested_at": "2026-10-13T21:54:00+05:30",
+    "fetched_at": "2026-10-13T21:54:05+05:30",
+    "window_hr": 2,
+    "available": true,
+    "from_cache": false,
+    "stale_fallback": false,
+    "snapshot_age_seconds_at_decision": 175.0,
+    "source": "archive",
+    "trains": [
+      {
+        "train_number": "12280",
+        "train_name": "TAJ EXPRESS",
+        "platform": "12",
+        "time_min": 1315,
+        "time_raw": "21:55",
+        "is_originating": false,
+        "is_terminating": true
+      }
+    ],
+    "raw_hash": "sha256_ntes_before_ndls_006"
+  },
+  "ntes_after": {
+    "site_id": "ndls_pf12_13",
+    "station_code": "NDLS",
+    "requested_at": "2026-10-13T22:00:00+05:30",
+    "fetched_at": "2026-10-13T22:00:05+05:30",
+    "window_hr": 2,
+    "available": true,
+    "from_cache": false,
+    "stale_fallback": false,
+    "snapshot_age_seconds_at_decision": 0.0,
+    "source": "archive",
+    "trains": [
+      {
+        "train_number": "12280",
+        "train_name": "TAJ EXPRESS",
+        "platform": "12",
+        "time_min": 1315,
+        "time_raw": "21:55",
+        "is_originating": false,
+        "is_terminating": true
+      }
+    ],
+    "raw_hash": "sha256_ntes_after_ndls_006"
+  },
+  "ground_truth": {
+    "actual_train_number": "12280",
+    "actual_train_name": "TAJ EXPRESS",
+    "reviewer": "human_expert",
+    "quality": "VERIFIED"
+  }
+}

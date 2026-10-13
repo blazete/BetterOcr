@@ -1,0 +1,18 @@
+# Shadow Lab Global Defaults
+shadow_defaults:
+  schema_version: "1.0"
+  algorithm_version: "shadow_resolver_v0.1"
+  default_timezone: "Asia/Kolkata"
+  min_distinct_coaches_confirmed: 3
+  provisional_min_distinct_coaches: 1
+  service_early_min: 15
+  service_late_min: 90
+  temporal_window_offsets: [-3, -2, -1, 0, 1, 2, 3]
+  ntes_default_ttl_s: 180
+  ntes_post_offset_s: 180
+  ntes_presence_window_min: 20
+  allow_network_default: false
+  enforce_production_read_only: true
+  evidence_store_dir: "shadow_lab/workspace/evidence"
+  reports_dir: "shadow_lab/workspace/reports"
+  logs_dir: "shadow_lab/workspace/logs"

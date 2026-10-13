@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shadow-identity"
+version = "0.1.0"
+description = "Multi-Site Train Identity Shadow Lab for Railway/MVIS ARDS"
+authors = [{ name = "Antigravity Engineering" }]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+    "pandas>=2.0.0",
+    "pydantic>=2.0.0",
+    "pytest>=8.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ShadowSiteConfig",
+  "type": "object",
+  "required": [
+    "site_id",
+    "installation_id",
+    "station",
+    "platforms",
+    "schedule",
+    "ntes",
+    "shadow"
+  ],
+  "properties": {
+    "site_id": { "type": "string" },
+    "installation_id": { "type": "string" },
+    "station": {
+      "type": "object",
+      "required": ["code", "name", "ntes_query", "timezone"],
+      "properties": {
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "ntes_query": { "type": "string" },
+        "timezone": { "type": "string" }
+      }
+    },
+    "platforms": {
+      "type": "object",
+      "required": ["configured", "observable_from_camera", "possible_when_unknown"],
+      "properties": {
+        "configured": { "type": "array", "items": { "type": "string" } },
+        "observable_from_camera": { "type": "boolean" },
+        "possible_when_unknown": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "cameras": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["camera_id", "role"],
+        "properties": {
+          "camera_id": { "type": "string" },
+          "role": { "type": "string" },
+          "direction_calibration": { "type": "string" }
+        }
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "required": ["path", "version", "effective_from"],
+      "properties": {
+        "path": { "type": "string" },
+        "version": { "type": "string" },
+        "effective_from": { "type": "string" },
+        "effective_until": { "type": ["string", "null"] },
+        "checksum_sha256": { "type": "string" },
+        "approved_by": { "type": "string" }
+      }
+    },
+    "ntes": {
+      "type": "object",
+      "required": ["mode", "ttl_s", "post_passage_offset_s", "allow_network"],
+      "properties": {
+        "mode": { "type": "string", "enum": ["replay_only", "shared_snapshot", "restricted_fetch"] },
+        "ttl_s": { "type": "integer" },
+        "post_passage_offset_s": { "type": "integer" },
+        "optional_second_check_offset_s": { "type": "integer" },
+        "allow_network": { "type": "boolean" },
+        "fetch_timeout_s": { "type": "integer" },
+        "min_refresh_interval_s": { "type": "integer" }
+      }
+    },
+    "shadow": {
+      "type": "object",
+      "required": ["enabled", "production_write_allowed"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "production_write_allowed": { "type": "boolean", "const": false },
+        "manual_review_required_for_confirmations": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+train-identity-lab/.venv/
+
+# Pytest
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Videos (too large for GitHub — store separately)
+*.mp4
+*.avi
+*.mkv
+
+# Debug frames and visual outputs
+train-identity-lab/outputs/
+train-identity-lab/frames/
+
+# Generated reports (regenerated on each run)
+shadow_lab/workspace/reports/
+shadow_lab/workspace/logs/
+shadow_lab/workspace/evidence/
+
+# Antigravity internal
+shadow_lab/README_FOR_ANTIGRAVITY.md

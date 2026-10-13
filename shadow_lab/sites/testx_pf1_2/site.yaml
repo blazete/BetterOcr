@@ -1,0 +1,34 @@
+site_id: testx_pf1_2
+installation_id: testx_ards_01
+station:
+  code: TESTX
+  name: TEST X JUNCTION
+  ntes_query: "TESTX - TEST X JUNCTION"
+  timezone: Asia/Kolkata
+platforms:
+  configured: ["1", "2"]
+  observable_from_camera: true
+  possible_when_unknown: ["1", "2"]
+cameras:
+  - camera_id: test_cam_01
+    role: train_identity
+    direction_calibration: verified
+schedule:
+  path: shadow_lab/sites/testx_pf1_2/schedules/testx_validated.csv
+  version: "2026-10-13-testx-v1"
+  effective_from: "2026-01-01"
+  effective_until: null
+  checksum_sha256: "707a0bb5197696093504b4d5259b7f6c4c8c7e55bf952d79d8e192575c997748"
+  approved_by: "QA_ENGINEER"
+ntes:
+  mode: replay_only
+  ttl_s: 180
+  post_passage_offset_s: 180
+  optional_second_check_offset_s: 300
+  allow_network: false
+  fetch_timeout_s: 8
+  min_refresh_interval_s: 180
+shadow:
+  enabled: true
+  production_write_allowed: false
+  manual_review_required_for_confirmations: true

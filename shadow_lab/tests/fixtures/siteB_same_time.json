@@ -1,0 +1,137 @@
+{
+  "passage": {
+    "schema_version": "1.0",
+    "site_id": "testx_pf1_2",
+    "installation_id": "testx_ards_01",
+    "passage_id": "PAS_20261013_2200_TESTX_001",
+    "camera_id": "side_a",
+    "passage_start": "2026-10-13T22:00:00+05:30",
+    "passage_end": "2026-10-13T22:02:00+05:30",
+    "possible_platforms": ["1", "2"],
+    "observed_platform": null,
+    "direction": "UP",
+    "source_files": [
+      {
+        "uri": "fixtures/synthetic_testx.mp4",
+        "sha256": "mock_sha256_synthetic_testx"
+      }
+    ],
+    "production_inspection_id": "INSP_001_TESTX",
+    "production_readonly_result": {
+      "train_number": "88001",
+      "confidence": "MEDIUM",
+      "source": "production_ards",
+      "recorded_at": "2026-10-13T22:02:15+05:30"
+    }
+  },
+  "visual_evidence": {
+    "passage_id": "PAS_20261013_2200_TESTX_001",
+    "ocr_model_version": "paddle-v3-shadow",
+    "preprocessing_profile": "upscale_2x",
+    "per_observation": [
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 100,
+        "timestamp_offset_ms": 4000,
+        "raw_text": "88001",
+        "normalized_text": "88001",
+        "entity_type": "SERVICE_NUMBER",
+        "bbox": [10, 20, 100, 50],
+        "ocr_confidence": 0.94
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 220,
+        "timestamp_offset_ms": 8800,
+        "raw_text": "88001",
+        "normalized_text": "88001",
+        "entity_type": "SERVICE_NUMBER",
+        "bbox": [12, 22, 102, 52],
+        "ocr_confidence": 0.96
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 350,
+        "timestamp_offset_ms": 14000,
+        "raw_text": "88001",
+        "normalized_text": "88001",
+        "entity_type": "SERVICE_NUMBER",
+        "bbox": [10, 20, 100, 50],
+        "ocr_confidence": 0.92
+      },
+      {
+        "coach_segment_id": "C01",
+        "frame_id": 105,
+        "timestamp_offset_ms": 4200,
+        "raw_text": "TESTX INTERCITY EXPRESS",
+        "normalized_text": "TESTX INTERCITY EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [10, 60, 250, 90],
+        "ocr_confidence": 0.95
+      },
+      {
+        "coach_segment_id": "C02",
+        "frame_id": 225,
+        "timestamp_offset_ms": 9000,
+        "raw_text": "TESTX INTERCITY EXPRESS",
+        "normalized_text": "TESTX INTERCITY EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [10, 60, 250, 90],
+        "ocr_confidence": 0.97
+      },
+      {
+        "coach_segment_id": "C03",
+        "frame_id": 355,
+        "timestamp_offset_ms": 14200,
+        "raw_text": "TESTX INTERCITY EXPRESS",
+        "normalized_text": "TESTX INTERCITY EXPRESS",
+        "entity_type": "TRAIN_NAME",
+        "bbox": [10, 60, 250, 90],
+        "ocr_confidence": 0.96
+      }
+    ],
+    "passage_consensus": {
+      "service_number_candidates": [
+        {"number": "88001", "distinct_coaches": 3}
+      ],
+      "stable_pair": ["88001"],
+      "train_name_candidates": [
+        {"name": "TESTX INTERCITY EXPRESS", "distinct_coaches": 3}
+      ],
+      "endpoint_candidates": [],
+      "number_board_type": "TWO_NUMBER",
+      "numeric_status": "PAIR_CONFIRMED"
+    }
+  },
+  "ntes_before": {
+    "site_id": "testx_pf1_2",
+    "station_code": "TESTX",
+    "requested_at": "2026-10-13T21:59:00+05:30",
+    "fetched_at": "2026-10-13T21:59:05+05:30",
+    "window_hr": 2,
+    "available": true,
+    "from_cache": false,
+    "stale_fallback": false,
+    "snapshot_age_seconds_at_decision": 175.0,
+    "source": "archive",
+    "trains": [
+      {
+        "train_number": "88001",
+        "train_name": "TESTX INTERCITY EXPRESS",
+        "platform": "1",
+        "time_min": 510,
+        "time_raw": "08:30",
+        "is_originating": false,
+        "is_terminating": false
+      }
+    ],
+    "raw_hash": "sha256_ntes_before_testx_001"
+  },
+  "ntes_after": null,
+  "ground_truth": {
+    "actual_train_number": "88001",
+    "actual_train_name": "TESTX INTERCITY EXPRESS",
+    "reviewer": "human_expert",
+    "quality": "VERIFIED"
+  }
+}

@@ -1,0 +1,12 @@
+# Name aliases and transliteration maps for TESTX
+aliases:
+  "COASTAL EXPRESS":
+    canonical_name: "COASTAL EXPRESS"
+    service_numbers: ["88003", "88004"]
+    endpoints: ["TEST X", "COASTAL HARBOR"]
+    variations: ["COASTAL EXP", "TX-COASTAL EXP"]
+  "TESTX INTERCITY":
+    canonical_name: "TESTX INTERCITY EXPRESS"
+    service_numbers: ["88001"]
+    endpoints: ["INLAND CITY", "TEST X"]
+    variations: ["TESTX INTERCITY", "TESTX IC EXP"]
