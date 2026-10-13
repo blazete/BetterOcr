@@ -31,6 +31,7 @@ from shadow_identity.reason_codes import (
     RC_NTES_POST_180S_ABSENT_IGNORED,
     RC_NTES_POST_180S_CONFIRMED,
     RC_NTES_UNAVAILABLE,
+    RC_NTES_WRONG_STATION_REJECTED,
     RC_NUMBER_NAME_CONFLICT,
     RC_PLATFORM_AMBIGUOUS_ISLAND,
     RC_PLATFORM_VERIFIED,
@@ -46,11 +47,12 @@ from shadow_identity.reason_codes import (
     RC_VISUAL_NAME_STRONG,
     RC_VISUAL_NTES_CONFLICT,
     RC_VISUAL_NUMBERS_UNAVAILABLE,
+    RC_VISUAL_PAIR_ACTIVE_SERVICE_UNCONFIRMED,
     RC_VISUAL_PAIR_CONFIRMED,
     RC_VISUAL_PAIR_PROVISIONAL,
     RC_VISUAL_SINGLE_CANDIDATE,
 )
-from shadow_identity.text_normalization import match_name_similarity
+from shadow_identity.text_normalization import match_name_similarity, match_name_with_aliases
 from shadow_identity.timetable_matcher import TimetableMatcher
 
 
@@ -114,13 +116,22 @@ def resolve_shadow(
     if not passage.observed_platform and len(passage.possible_platforms) > 1:
         reason_codes.append(RC_PLATFORM_AMBIGUOUS_ISLAND)
 
+    # Extract platform list cleanly without precedence ambiguity
+    if passage.possible_platforms:
+        pfs = [str(p) for p in passage.possible_platforms]
+    elif passage.observed_platform:
+        pfs = [str(passage.observed_platform)]
+    else:
+        pfs = []
+
     # 3. Match against site timetable
     sched_matches = matcher.find_candidates(
         event_dt=passage_dt,
-        possible_platforms=passage.possible_platforms,
+        possible_platforms=pfs,
         direction=passage.direction,
         target_numbers=stable_pair or num_cands,
         target_name=top_name,
+        site_aliases=site_aliases,
     )
 
     for sm in sched_matches:
@@ -134,17 +145,45 @@ def resolve_shadow(
         )
         candidates_map[t_no] = c_obj
 
-    # 4. Process NTES before/at passage (Stage T1)
-    ntes_active = ntes_before if stage in ("T0", "T1") else (ntes_after or ntes_before)
+    # 4. Process NTES before/at passage (Stage T1 baseline)
+    ntes_active = ntes_before if ntes_before is not None else (ntes_after if stage == "T2" else None)
+    is_fresh_ntes = False
 
     if ntes_active and ntes_active.available:
-        if ntes_active.stale_fallback:
+        # P0 Check 1: Enforce Station and Site Isolation
+        if ntes_active.site_id != site_id:
+            reason_codes.append(RC_NTES_WRONG_STATION_REJECTED)
+            reason_codes.append(RC_NTES_UNAVAILABLE)
+            ntes_active = None
+        elif config and config.get("station", {}).get("code") and ntes_active.station_code:
+            expected_code = config.get("station", {}).get("code")
+            if ntes_active.station_code != expected_code:
+                reason_codes.append(RC_NTES_WRONG_STATION_REJECTED)
+                reason_codes.append(RC_NTES_UNAVAILABLE)
+                ntes_active = None
+
+    if ntes_active and ntes_active.available:
+        # P0 Check 2: Snapshot TTL and Freshness Validation
+        ttl_seconds = config.get("ntes_default_ttl_s", 180) if config else 180
+        snapshot_age = ntes_active.snapshot_age_seconds_at_decision
+
+        if ntes_active.fetched_at:
+            try:
+                fetched_dt = datetime.fromisoformat(ntes_active.fetched_at)
+                age_calc = (passage_dt - fetched_dt).total_seconds()
+                if age_calc > 0:
+                    snapshot_age = max(snapshot_age, age_calc)
+            except Exception:
+                pass
+
+        if ntes_active.stale_fallback or snapshot_age > ttl_seconds:
             reason_codes.append(RC_NTES_CORROBORATED_STALE)
+            is_fresh_ntes = False
         else:
             reason_codes.append(RC_NTES_CORROBORATED_FRESH)
+            is_fresh_ntes = True
 
-        # Platforms to check
-        pfs = passage.possible_platforms or [passage.observed_platform] if passage.observed_platform else []
+        # P0 Check 3: Strict Platform Filtering (Unrelated platforms MUST NOT influence resolution)
         ntes_trains: List[NtesTrainEntry] = []
         if pfs:
             for pf in pfs:
@@ -170,17 +209,21 @@ def resolve_shadow(
                 candidates_map[t_no].evidence_list.append("CORROBORATION_VISUAL_PAIR_AND_NTES")
                 candidates_map[t_no].score += 4.0
             
-            # Corroborate with visual name
-            if top_name and match_name_similarity(top_name, nt.train_name) >= 0.6:
-                candidates_map[t_no].evidence_list.append("CORROBORATION_VISUAL_NAME_AND_NTES")
-                candidates_map[t_no].score += 3.0
+            # Corroborate with visual name via alias-aware matching
+            if top_name:
+                sim = match_name_with_aliases(top_name, nt.train_name, site_aliases=site_aliases)
+                if sim >= 0.6:
+                    candidates_map[t_no].evidence_list.append("CORROBORATION_VISUAL_NAME_AND_NTES")
+                    candidates_map[t_no].score += 3.0
+    elif ntes_active is None:
+        pass
     else:
         reason_codes.append(RC_NTES_UNAVAILABLE)
 
     # 5. Process Stage T2 (+180s post-passage check)
     post_kind = "UNAVAILABLE"
     if stage == "T2":
-        if ntes_after and ntes_after.available:
+        if ntes_after and ntes_after.available and ntes_after.site_id == site_id:
             post_kind = "NEW_FETCH" if not ntes_after.from_cache else "CACHE_REUSE"
             # Check if candidates are still confirmed or corroborated
             for t_no, cand in candidates_map.items():
@@ -232,8 +275,19 @@ def resolve_shadow(
                 final_status = "AMBIGUOUS"
                 final_number = None
             else:
-                final_status = "CONFIRMED"
-                final_number = top_cand.train_number
+                # P0: Require unique, fresh corroboration that this candidate is the ACTIVE service
+                has_fresh_ntes = any("CORROBORATION_VISUAL_PAIR_AND_NTES" in ev for ev in top_cand.evidence_list) and is_fresh_ntes
+                has_direction = any(RC_DIRECTION_CORROBORATED in ev for ev in top_cand.evidence_list)
+                has_strong_name = any("CORROBORATION_VISUAL_NAME" in ev or "TIMETABLE_NAME_MATCH" in ev for ev in top_cand.evidence_list)
+
+                if has_fresh_ntes or has_direction or has_strong_name:
+                    final_status = "CONFIRMED"
+                    final_number = top_cand.train_number
+                else:
+                    # Pair is verified on coach boards, but active running direction is unconfirmed without live corroboration
+                    reason_codes.append(RC_VISUAL_PAIR_ACTIVE_SERVICE_UNCONFIRMED)
+                    final_status = "PROVISIONAL"
+                    final_number = top_cand.train_number
 
         # Pathway B: Provisional Visual Pair
         elif v_cons.numeric_status == "PAIR_PROVISIONAL":
@@ -242,10 +296,20 @@ def resolve_shadow(
 
         # Pathway C: Complex 4/6-Number Board
         elif v_cons.numeric_status == "COMPLEX_BOARD":
-            # Must have name match to corroborate
-            if any("TIMETABLE_NAME_MATCH" in ev or "CORROBORATION_VISUAL_NAME" in ev for ev in top_cand.evidence_list):
-                final_status = "PROVISIONAL"
-                final_number = top_cand.train_number
+            # Must intersect candidate numbers with train name / site aliases to isolate service family
+            if top_name:
+                resolved_cands = []
+                for cand in ranked_candidates:
+                    if match_name_with_aliases(top_name, cand.train_name, site_aliases=site_aliases) >= 0.6:
+                        resolved_cands.append(cand)
+                if resolved_cands:
+                    best_cand = sorted(resolved_cands, key=lambda c: c.score, reverse=True)[0]
+                    final_status = "PROVISIONAL"
+                    final_number = best_cand.train_number
+                else:
+                    reason_codes.append(RC_AMBIGUOUS_MULTI_CANDIDATE)
+                    final_status = "AMBIGUOUS"
+                    final_number = None
             else:
                 reason_codes.append(RC_AMBIGUOUS_MULTI_CANDIDATE)
                 final_status = "AMBIGUOUS"
@@ -253,7 +317,7 @@ def resolve_shadow(
 
         # Pathway D: Non-Numeric Board (Name + Route Endpoints Fallback)
         elif v_cons.numeric_status == "NOT_NUMBERED":
-            if any("TIMETABLE_NAME_MATCH" in ev for ev in top_cand.evidence_list):
+            if any("TIMETABLE_NAME_MATCH" in ev or "CORROBORATION_VISUAL_NAME" in ev for ev in top_cand.evidence_list):
                 if runner_up and abs(top_cand.score - runner_up.score) < 0.5:
                     reason_codes.append(RC_AMBIGUOUS_MULTI_CANDIDATE)
                     final_status = "AMBIGUOUS"

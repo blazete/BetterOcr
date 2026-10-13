@@ -188,11 +188,18 @@ def test_direction_conflict_provisional_or_conflict():
     )
     evidence = VisualOcrEvidence(passage_id="P1", passage_consensus=v_cons)
     rows = [
-        TimetableRow(site_id="ndls_pf12_13", schedule_version="v1", station_code="NDLS", train_number="12920", train_name="MALWA EXP", departure_local="17:20")
+        TimetableRow(
+            site_id="ndls_pf12_13",
+            schedule_version="v1",
+            station_code="NDLS",
+            train_number="12920",
+            train_name="INDORE-NDLS MALWA EXP",
+            arrival_local="17:20",
+        )
     ]
     dec = resolve_shadow(passage, evidence, rows)
-    # Direction is accounted for; cannot be false high confidence
-    assert dec.shadow_status != "CONFIRMED" or dec.shadow_final_number == "12920"
+    # Direction is in conflict (arriving train vs departing passage); cannot be CONFIRMED
+    assert dec.shadow_status != "CONFIRMED"
 
 
 def test_unknown_platform_not_asserted():

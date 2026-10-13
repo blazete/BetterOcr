@@ -144,7 +144,8 @@
   "ground_truth": {
     "actual_train_number": "12280",
     "actual_train_name": "TAJ EXPRESS",
-    "reviewer": "human_expert",
-    "quality": "VERIFIED"
+    "reviewer": "synthetic_platform_benchmark",
+    "quality": "SYNTHETIC_TEST_FIXTURE",
+    "note": "Synthetic test fixture for non-numbered board name-first resolution at Platform 12/13. Not an independently audited field passage."
   }
 }

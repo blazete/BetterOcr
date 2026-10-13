@@ -12,7 +12,7 @@ from typing import Dict, List, Optional
 
 from shadow_identity.coach_consensus import CoachConsensusAggregator
 from shadow_identity.models import VisualObservation, VisualOcrEvidence
-from shadow_identity.text_normalization import is_negative_class
+from shadow_identity.text_normalization import is_endpoint_text, is_negative_class
 
 
 class OcrAdapter:
@@ -47,6 +47,8 @@ class OcrAdapter:
                     etype = "NEGATIVE_STENCIL"
                 elif c5d:
                     etype = "SERVICE_NUMBER"
+                elif is_endpoint_text(raw_txt):
+                    etype = "ENDPOINT"
                 elif any(c.isalpha() for c in raw_txt) and len(raw_txt) > 3:
                     etype = "TRAIN_NAME"
                 else:

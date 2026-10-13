@@ -5,7 +5,7 @@ and route endpoints, while rejecting coach serials and negative classes.
 """
 
 import re
-from typing import List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Negative class patterns (coach serials, berth numbers, class stencils)
 COACH_SERIAL_REGEX = re.compile(r"^\d{4,6}[A-Z]?(?:/[A-Z0-9]+)?$")
@@ -74,6 +74,39 @@ def normalize_train_name(text: str) -> str:
     return " ".join(filtered)
 
 
+KNOWN_STATIONS = {
+    "NEW DELHI", "DELHI", "NDLS", "DLI", "OLD DELHI", "HAZRAT NIZAMUDDIN", "NZM",
+    "ANAND VIHAR", "ANVT", "VGL JHANSI", "JHANSI", "VGLJ", "LUCKNOW", "LJN", "LKO",
+    "KANPUR", "KANPUR CENTRAL", "CNB", "BANARAS", "BSBS", "VARANASI", "BSB",
+    "HOWRAH", "HWH", "SEALDAH", "SDAH", "KOLKATA", "GWALIOR", "GWL", "AGRA", "AGC",
+    "AMRITSAR", "ASR", "JAMMU", "JAMMU TAWI", "JAT", "PATNA", "PNBE", "GORAKHPUR", "GKP",
+    "MUMBAI", "MUMBAI CENTRAL", "CSMT", "MMCT", "CHENNAI", "MAS", "GHAZIABAD", "GZB",
+    "PANIPAT", "PNP", "KURUKSHETRA", "KKDE", "JAYNAGAR", "JYG", "DARBHANGA", "DBG",
+    "GODDA", "GODA", "SILCHAR", "SCL", "GUWAHATI", "GHY", "KOTA", "SGAC", "TILAK BRIDGE", "TKJ", "BSC",
+}
+
+
+def is_endpoint_text(text: str, extra_endpoints: Optional[Set[str]] = None) -> bool:
+    """
+    Check if text is a route endpoint or origin-destination pair rather than a train name.
+    E.g. 'NEW DELHI', 'VGL JHANSI', 'NEW DELHI - VGL JHANSI', 'NDLS-LJN', etc.
+    """
+    cleaned = text.strip().upper()
+    if not cleaned:
+        return False
+    # Route separators
+    if "-" in cleaned or "–" in cleaned or " TO " in cleaned:
+        return True
+    norm = normalize_train_name(cleaned)
+    if norm in KNOWN_STATIONS:
+        return True
+    if extra_endpoints:
+        norm_extras = {normalize_train_name(e) for e in extra_endpoints if e}
+        if norm in norm_extras:
+            return True
+    return False
+
+
 def match_name_similarity(query_name: str, target_name: str) -> float:
     """Token-based Jaccard / Overlap similarity between two train names."""
     q_norm = normalize_train_name(query_name)
@@ -99,3 +132,46 @@ def match_name_similarity(query_name: str, target_name: str) -> float:
     intersect = q_tokens.intersection(t_tokens)
     union = q_tokens.union(t_tokens)
     return len(intersect) / len(union) if union else 0.0
+
+
+def match_name_with_aliases(
+    query_name: str,
+    target_name: str,
+    target_aliases: Optional[List[str]] = None,
+    site_aliases: Optional[Dict[str, Any]] = None,
+) -> float:
+    """
+    Compute best similarity across canonical target name, target aliases,
+    and site-level alias registry.
+    """
+    best_score = match_name_similarity(query_name, target_name)
+    if target_aliases:
+        for alias in target_aliases:
+            score = match_name_similarity(query_name, alias)
+            if score > best_score:
+                best_score = score
+
+    if site_aliases:
+        alias_dict = site_aliases.get("aliases", site_aliases)
+        q_norm = normalize_train_name(query_name)
+        t_norm = normalize_train_name(target_name)
+        for canon, entry in alias_dict.items():
+            if not isinstance(entry, dict):
+                continue
+            names_in_entry = [canon]
+            names_in_entry.append(entry.get("canonical_name", ""))
+            names_in_entry.extend(entry.get("variations", []))
+            normalized_entry_names = [normalize_train_name(n) for n in names_in_entry if n]
+            
+            # If query matches this entry
+            q_matches = any(match_name_similarity(q_norm, en) >= 0.8 for en in normalized_entry_names)
+            t_matches = any(match_name_similarity(t_norm, en) >= 0.8 for en in normalized_entry_names)
+            if q_matches and t_matches:
+                return max(best_score, 1.0)
+            if q_matches:
+                for en in normalized_entry_names:
+                    s = match_name_similarity(t_norm, en)
+                    if s > best_score:
+                        best_score = s
+
+    return round(best_score, 4)

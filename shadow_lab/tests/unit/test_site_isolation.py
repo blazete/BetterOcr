@@ -48,17 +48,32 @@ def test_station_A_schedule_not_used_at_station_B(registry):
 
 
 def test_station_A_ntes_not_used_at_station_B():
-    """Test 4: wrong-station snapshot cannot be applied to another station."""
-    snapshot = NtesSnapshot(
+    """Test 4: wrong-station snapshot cannot be applied to another station and is rejected by resolver."""
+    from shadow_identity.candidate_resolver import resolve_shadow
+    from shadow_identity.models import VisualOcrEvidence, PassageVisualConsensus, NtesTrainEntry
+    from shadow_identity.reason_codes import RC_NTES_WRONG_STATION_REJECTED
+
+    passage = PassageInput(
         site_id="ndls_pf12_13",
-        station_code="NDLS",
+        passage_id="P_NDLS_01",
+        passage_start="2026-10-13T17:20:00+05:30",
+        possible_platforms=["12", "13"],
+    )
+    evidence = VisualOcrEvidence(passage_id="P_NDLS_01", passage_consensus=PassageVisualConsensus())
+    
+    # Snapshot from Station B (TESTX)
+    snapshot_testx = NtesSnapshot(
+        site_id="testx_pf1_2",
+        station_code="TESTX",
         requested_at="2026-10-13T17:20:00+05:30",
         fetched_at="2026-10-13T17:20:05+05:30",
+        trains=[NtesTrainEntry(train_number="99999", train_name="TESTX LOCAL", platform="12")],
     )
-    assert snapshot.site_id == "ndls_pf12_13"
-    assert snapshot.station_code == "NDLS"
-    # Ensure assertion fails if attempted to be associated with TESTX
-    assert snapshot.station_code != "TESTX"
+
+    dec = resolve_shadow(passage, evidence, [], ntes_before=snapshot_testx)
+    assert RC_NTES_WRONG_STATION_REJECTED in dec.reason_codes
+    # Unrelated station train must NEVER become a candidate for NDLS passage
+    assert not any(c.train_number == "99999" for c in dec.candidate_services)
 
 
 def test_two_installations_same_station_share_snapshot_without_mixing_passages():

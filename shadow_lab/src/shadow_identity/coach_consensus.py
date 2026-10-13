@@ -15,6 +15,7 @@ from shadow_identity.models import (
 )
 from shadow_identity.text_normalization import (
     extract_5digit_candidates,
+    is_endpoint_text,
     is_negative_class,
     normalize_train_name,
 )
@@ -71,6 +72,11 @@ class CoachConsensusAggregator:
                     number_total_obs[c] += 1
 
             elif etype == "TRAIN_NAME":
+                if is_endpoint_text(raw):
+                    norm_ep = raw.strip().upper()
+                    if norm_ep and len(norm_ep) > 2:
+                        endpoint_candidates.add(norm_ep)
+                    continue
                 norm_n = normalize_train_name(raw)
                 if norm_n and len(norm_n) > 3 and not is_negative_class(norm_n):
                     coaches_names[norm_n].add(cid)

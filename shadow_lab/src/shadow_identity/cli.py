@@ -9,11 +9,12 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from shadow_identity.candidate_resolver import resolve_shadow
+from shadow_identity.coach_consensus import CoachConsensusAggregator
 from shadow_identity.comparison import ComparisonEvaluator, categorize_comparison
 from shadow_identity.config_loader import ConfigError, SiteRegistry, compute_file_sha256
 from shadow_identity.models import (
@@ -128,20 +129,25 @@ def dict_to_visual(v_dict: Dict[str, Any]) -> VisualOcrEvidence:
     for o in v_dict.get("per_observation", []):
         obs_list.append(VisualObservation(**o))
 
-    cons_d = v_dict.get("passage_consensus", {})
-    num_cands = [NumberCandidate(**c) for c in cons_d.get("service_number_candidates", [])]
-    name_cands = [NameCandidate(**c) for c in cons_d.get("train_name_candidates", [])]
-    raw_ep = cons_d.get("endpoint_candidates", [])
-    ep_cands = [e if isinstance(e, str) else e.get("endpoint", "") for e in raw_ep]
+    if obs_list:
+        # Independently recompute consensus from raw coach observations
+        aggregator = CoachConsensusAggregator(confirmed_threshold=3)
+        consensus = aggregator.aggregate_observations(obs_list)
+    else:
+        cons_d = v_dict.get("passage_consensus", {})
+        num_cands = [NumberCandidate(**c) for c in cons_d.get("service_number_candidates", [])]
+        name_cands = [NameCandidate(**c) for c in cons_d.get("train_name_candidates", [])]
+        raw_ep = cons_d.get("endpoint_candidates", [])
+        ep_cands = [e if isinstance(e, str) else e.get("endpoint", "") for e in raw_ep]
 
-    consensus = PassageVisualConsensus(
-        service_number_candidates=num_cands,
-        stable_pair=cons_d.get("stable_pair", []),
-        train_name_candidates=name_cands,
-        endpoint_candidates=ep_cands,
-        number_board_type=cons_d.get("number_board_type", "UNKNOWN"),
-        numeric_status=cons_d.get("numeric_status", "UNKNOWN"),
-    )
+        consensus = PassageVisualConsensus(
+            service_number_candidates=num_cands,
+            stable_pair=cons_d.get("stable_pair", []),
+            train_name_candidates=name_cands,
+            endpoint_candidates=ep_cands,
+            number_board_type=cons_d.get("number_board_type", "UNKNOWN"),
+            numeric_status=cons_d.get("numeric_status", "UNKNOWN"),
+        )
 
     return VisualOcrEvidence(
         passage_id=v_dict.get("passage_id", ""),
@@ -364,25 +370,75 @@ def cmd_compare(args: argparse.Namespace) -> int:
     registry = SiteRegistry(shadow_lab_root=repo_root / "shadow_lab")
     evaluator = ComparisonEvaluator()
 
-    fixtures_dir = repo_root / "shadow_lab" / "tests" / "fixtures"
-    fixture_files = sorted(list(fixtures_dir.glob("*.json")))
+    search_dirs = []
+    if getattr(args, "passages_dir", None):
+        p_dir = Path(args.passages_dir)
+        search_dirs.append(repo_root / p_dir if not p_dir.is_absolute() else p_dir)
+    else:
+        # Standard workflow: check real workspace passages first
+        workspace_passages = repo_root / "shadow_lab" / "workspace" / "passages"
+        if workspace_passages.exists() and list(workspace_passages.glob("*.json")):
+            search_dirs.append(workspace_passages)
+        search_dirs.append(repo_root / "shadow_lab" / "tests" / "fixtures")
 
-    if not fixture_files:
-        print("[FAIL] No fixture files found to compare!")
+    passage_files = []
+    for s_dir in search_dirs:
+        if s_dir.exists():
+            passage_files.extend(sorted(list(s_dir.glob("*.json"))))
+
+    if not passage_files:
+        print("[FAIL] No passage or fixture files found to compare!")
         return 1
 
-    print(f"Executing weekly benchmark replay across {len(fixture_files)} fixtures...")
+    # Date-based filtering for --week-start
+    week_start_str = args.week_start
+    w_start_dt = None
+    w_end_dt = None
+    if week_start_str:
+        try:
+            w_start_dt = datetime.fromisoformat(week_start_str)
+            w_end_dt = w_start_dt + timedelta(days=7)
+        except Exception:
+            pass
 
-    for f_path in fixture_files:
+    print(f"Executing weekly benchmark replay for week starting {week_start_str} across {len(passage_files)} candidate files...")
+
+    replayed_count = 0
+    filtered_out_count = 0
+    for f_path in passage_files:
         data = load_fixture_data(f_path)
-        site_id = data.get("passage", {}).get("site_id")
+        p_info = data.get("passage", {})
+        site_id = p_info.get("site_id")
         if not site_id:
             continue
+
+        # Filter by week range if start/end timestamps are present
+        p_start_str = p_info.get("passage_start") or p_info.get("passage_end")
+        if w_start_dt and p_start_str:
+            try:
+                p_dt = datetime.fromisoformat(p_start_str)
+                if p_dt.tzinfo and not w_start_dt.tzinfo:
+                    w_start_cmp = w_start_dt.replace(tzinfo=p_dt.tzinfo)
+                    w_end_cmp = w_end_dt.replace(tzinfo=p_dt.tzinfo)
+                elif not p_dt.tzinfo and w_start_dt.tzinfo:
+                    w_start_cmp = w_start_dt.replace(tzinfo=None)
+                    w_end_cmp = w_end_dt.replace(tzinfo=None)
+                else:
+                    w_start_cmp = w_start_dt
+                    w_end_cmp = w_end_dt
+
+                if not (w_start_cmp <= p_dt <= w_end_cmp):
+                    filtered_out_count += 1
+                    continue
+            except Exception:
+                pass
+
         try:
             _, _, _, record = run_single_replay(site_id, data, registry, repo_root, silent=True)
             evaluator.add_record(record)
+            replayed_count += 1
         except Exception as e:
-            print(f"[WARN] Skipping fixture {f_path.name}: {e}")
+            print(f"[WARN] Skipping passage {f_path.name}: {e}")
 
     # Generate CSVs and markdown summary
     reports_dir = repo_root / "shadow_lab" / "workspace" / "reports"
@@ -392,6 +448,8 @@ def cmd_compare(args: argparse.Namespace) -> int:
     print(f"[PASS] Comparison CSV written: {comp_csv}")
     print(f"[PASS] Mismatch CSV written: {mis_csv}")
     print(f"[PASS] Weekly Summary Report written: {sum_md}")
+    if filtered_out_count:
+        print(f"[INFO] {filtered_out_count} passages excluded by week filter.")
 
     # Print summary metrics to console
     categories: Dict[str, int] = {}
@@ -434,6 +492,7 @@ def main() -> None:
     # compare
     p_cmp = subparsers.add_parser("compare", help="Generate side-by-side comparison report")
     p_cmp.add_argument("--week-start", default="2026-10-12", help="Start date of evaluation week")
+    p_cmp.add_argument("--passages-dir", default=None, help="Directory containing observed passage JSONs")
     p_cmp.add_argument("--all-sites", action="store_true", help="Include all registered sites")
 
     args = parser.parse_args()
