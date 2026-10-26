@@ -13,7 +13,22 @@ shadow_defaults:
   ntes_presence_window_min: 20
   allow_network_default: false
   live_shadow: false
+  allow_network: false
   enforce_production_read_only: true
   evidence_store_dir: "shadow_lab/workspace/evidence"
   reports_dir: "shadow_lab/workspace/reports"
   logs_dir: "shadow_lab/workspace/logs"
+
+  offline_replay:
+    enabled: false
+    allowed_roots: []
+
+  identity:
+    require_independent_direction: true
+    allow_name_only_confirmation: false
+    allow_timetable_only_confirmation: false
+    allow_synthetic_ntes_confirmation: false
+
+  worker:
+    max_ocr_calls: 25
+    retain_staged_mp4_seconds: 3600

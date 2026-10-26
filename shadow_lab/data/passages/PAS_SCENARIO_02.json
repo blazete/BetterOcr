@@ -62,6 +62,26 @@
     "version": "2026-10-13-validated-v1",
     "candidate_services": [
       {
+        "train_number": "12279",
+        "train_name": "TAJ EXPRESS",
+        "score": 3.0,
+        "evidence_list": [
+          "CURATED_NAME_ALIAS_MATCH:TAJ EXPRESS",
+          "SERVICE_FAMILY_CANDIDATE"
+        ],
+        "contradictions": []
+      },
+      {
+        "train_number": "12280",
+        "train_name": "TAJ EXPRESS",
+        "score": 3.0,
+        "evidence_list": [
+          "CURATED_NAME_ALIAS_MATCH:TAJ EXPRESS",
+          "SERVICE_FAMILY_CANDIDATE"
+        ],
+        "contradictions": []
+      },
+      {
         "train_number": "12230",
         "train_name": "NDLS-LJN (LUCKNOW MAIL )",
         "score": 2.889,
@@ -124,34 +144,47 @@
   "shadow_result": {
     "T0": {
       "train_number": null,
-      "status": "UNKNOWN",
+      "status": "AMBIGUOUS",
       "reason_codes": [
+        "AMBIGUOUS_MULTIPLE_EQUAL_CANDIDATES",
+        "NAME_MATCH",
+        "NAME_ONLY_ACTIVE_DIRECTION_UNVERIFIED",
+        "NAME_RECOGNIZED_COACH_UNVERIFIED",
         "NTES_UNAVAILABLE_OR_TIMED_OUT",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
-        "VISUAL_BOARD_NOT_NUMBERED",
-        "VISUAL_NAME_STRONG_CONSENSUS"
+        "SERVICE_FAMILY_MAPPING",
+        "SERVICE_FAMILY_MATCHED",
+        "VISUAL_BOARD_NOT_NUMBERED"
       ]
     },
     "T1": {
       "train_number": "12280",
       "status": "PROVISIONAL",
       "reason_codes": [
+        "NAME_MATCH",
+        "NAME_ONLY_ACTIVE_DIRECTION_UNVERIFIED",
+        "NAME_RECOGNIZED_COACH_UNVERIFIED",
         "NTES_CORROBORATED_FRESH_BOARD",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
+        "SERVICE_FAMILY_MAPPING",
+        "SERVICE_FAMILY_MATCHED",
         "TIMETABLE_NTES_CONFLICT",
-        "VISUAL_BOARD_NOT_NUMBERED",
-        "VISUAL_NAME_STRONG_CONSENSUS"
+        "VISUAL_BOARD_NOT_NUMBERED"
       ]
     },
     "T2": {
       "train_number": "12280",
       "status": "PROVISIONAL",
       "reason_codes": [
+        "NAME_MATCH",
+        "NAME_ONLY_ACTIVE_DIRECTION_UNVERIFIED",
+        "NAME_RECOGNIZED_COACH_UNVERIFIED",
         "NTES_CORROBORATED_FRESH_BOARD",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
+        "SERVICE_FAMILY_MAPPING",
+        "SERVICE_FAMILY_MATCHED",
         "TIMETABLE_NTES_CONFLICT",
-        "VISUAL_BOARD_NOT_NUMBERED",
-        "VISUAL_NAME_STRONG_CONSENSUS"
+        "VISUAL_BOARD_NOT_NUMBERED"
       ],
       "post_fetch_kind": "UNAVAILABLE"
     }

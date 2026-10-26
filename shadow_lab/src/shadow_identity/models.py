@@ -13,6 +13,43 @@ from typing import Any, Dict, List, Optional
 
 
 @dataclass
+class DirectionEvidence:
+    direction: Optional[str] = None
+    authentic: bool = False
+    fresh: bool = False
+    passage_link_verified: bool = False
+    source_authorized: bool = False
+    direction_matches_candidate: bool = False
+    source: Optional[str] = None
+    provenance: Optional[str] = None
+    is_synthetic: bool = False
+    has_conflict: bool = False
+
+
+@dataclass(frozen=True)
+class PassageContext:
+    site_id: str
+    installation_id: str
+    camera_id: str
+    passage_id: str
+    source_mp4_path: str
+    source_sha256: str
+    passage_start_utc: Optional[str]
+    passage_end_utc: Optional[str]
+    timestamp_source: str
+    observed_platform: Optional[str]
+    possible_platforms: tuple[str, ...]
+    track_id: Optional[str]
+    travel_direction: Optional[str]
+    direction_source: Optional[str]
+    coach_intervals_verified: bool
+    finalization_source: str
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
 class PassageInput:
     schema_version: str = "1.0"
     site_id: str = ""
@@ -24,6 +61,8 @@ class PassageInput:
     possible_platforms: List[str] = field(default_factory=list)
     observed_platform: Optional[str] = None
     direction: str = "unknown"
+    direction_evidence: Optional[DirectionEvidence] = None
+    coach_intervals_verified: bool = False
     source_files: List[Dict[str, str]] = field(default_factory=list)
     production_inspection_id: Optional[str] = None
     production_readonly_result: Optional[Dict[str, Any]] = None
@@ -69,6 +108,8 @@ class PassageVisualConsensus:
     endpoint_candidates: List[str] = field(default_factory=list)
     number_board_type: str = "UNKNOWN"  # "TWO_NUMBER", "FOUR_NUMBER", "SIX_NUMBER", "NOT_NUMBERED", "UNKNOWN"
     numeric_status: str = "PAIR_UNCONFIRMED"  # "PAIR_CONFIRMED", "PAIR_PROVISIONAL", "PAIR_UNCONFIRMED", "NOT_NUMBERED"
+    recognized_train_name: Optional[str] = None
+    service_family_candidates: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -78,6 +119,8 @@ class VisualOcrEvidence:
     preprocessing_profile: str = "2x_bicubic"
     per_observation: List[VisualObservation] = field(default_factory=list)
     passage_consensus: PassageVisualConsensus = field(default_factory=PassageVisualConsensus)
+    recognized_train_name: Optional[str] = None
+    service_family_candidates: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -170,6 +213,10 @@ class ShadowDecision:
     shadow_status: str = "UNKNOWN" # "CONFIRMED", "PROVISIONAL", "AMBIGUOUS", "CONFLICT", "UNKNOWN", "NOT_SERVICE_EVENT", "DATA_UNAVAILABLE"
     reason_codes: List[str] = field(default_factory=list)
     post_fetch_kind: Optional[str] = None # "NEW_FETCH", "CACHE_REUSE", "STALE_FALLBACK", "UNAVAILABLE"
+    recognized_train_name: Optional[str] = None
+    service_family_candidates: List[str] = field(default_factory=list)
+    active_service_number: Optional[str] = None
+    active_direction_verified: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

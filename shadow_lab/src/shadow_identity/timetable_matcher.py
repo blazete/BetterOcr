@@ -44,7 +44,7 @@ class TimetableMatcher:
 
     def find_candidates(
         self,
-        event_dt: datetime,
+        event_dt: Optional[datetime] = None,
         possible_platforms: Optional[List[str]] = None,
         direction: str = "unknown",
         target_numbers: Optional[List[str]] = None,
@@ -54,20 +54,21 @@ class TimetableMatcher:
         """
         Find candidate timetable rows for an event.
         Returns ranked list of candidate dictionaries with evidence tags.
+        If event_dt is None, time window corroboration is explicitly disabled.
         """
-        event_min = event_dt.hour * 60 + event_dt.minute
-        weekday = event_dt.weekday()
+        event_min = (event_dt.hour * 60 + event_dt.minute) if event_dt is not None else None
+        weekday = event_dt.weekday() if event_dt is not None else None
 
         candidates: List[Dict[str, Any]] = []
 
         for row in self.rows:
-            # 1. Operating day check
-            if weekday not in row.operating_days:
+            # 1. Operating day check (only if event_dt is provided)
+            if weekday is not None and weekday not in row.operating_days:
                 # Strict overnight check: only allow previous operating day if event is
                 # early morning (<= 06:00 / 360 min) AND train arrival is overnight
                 prev_day = (weekday - 1) % 7
                 is_overnight = False
-                if prev_day in row.operating_days and event_min <= 360:
+                if prev_day in row.operating_days and event_min is not None and event_min <= 360:
                     for time_str in (row.arrival_local, row.departure_local):
                         if time_str:
                             t_m = time_to_minutes(time_str)
@@ -91,23 +92,24 @@ class TimetableMatcher:
             best_delta = 999
             event_type = "halt"
 
-            for kind, s_min in sched_times:
-                diff = event_min - s_min
-                if diff < -720: diff += 1440
-                if diff > 720: diff -= 1440
+            if event_min is not None:
+                for kind, s_min in sched_times:
+                    diff = event_min - s_min
+                    if diff < -720: diff += 1440
+                    if diff > 720: diff -= 1440
 
-                if -self.early_window_min <= diff <= self.late_window_min:
-                    time_matched = True
-                    if abs(diff) < abs(best_delta):
+                    if -self.early_window_min <= diff <= self.late_window_min:
+                        time_matched = True
+                        if abs(diff) < abs(best_delta):
+                            best_delta = diff
+                            event_type = kind
+                    elif abs(diff) < abs(best_delta):
                         best_delta = diff
                         event_type = kind
-                elif abs(diff) < abs(best_delta):
-                    best_delta = diff
-                    event_type = kind
 
-            # Hard cutoff: trains farther than max_deviation_min away cannot be candidates
-            if abs(best_delta) > self.max_deviation_min:
-                continue
+                # Hard cutoff: trains farther than max_deviation_min away cannot be candidates
+                if abs(best_delta) > self.max_deviation_min:
+                    continue
 
             # Check number match
             number_match = bool(target_numbers and row.train_number in target_numbers)
@@ -164,12 +166,13 @@ class TimetableMatcher:
             if name_match:
                 evidence.append(f"TIMETABLE_NAME_MATCH_{int(name_score*100)}PCT")
                 score += 3.0 * name_score
-            if time_matched:
-                evidence.append(f"TIMETABLE_TIME_WINDOW_DELTA_{best_delta}MIN")
-                score += max(0.0, 2.0 - abs(best_delta) / 45.0)
-            else:
-                evidence.append(RC_SCHEDULE_OUTSIDE_WINDOW)
-                score -= 2.0
+            if event_min is not None:
+                if time_matched:
+                    evidence.append(f"TIMETABLE_TIME_WINDOW_DELTA_{best_delta}MIN")
+                    score += max(0.0, 2.0 - abs(best_delta) / 45.0)
+                else:
+                    evidence.append(RC_SCHEDULE_OUTSIDE_WINDOW)
+                    score -= 2.0
 
             if platform_plausible and row.platform:
                 evidence.append(f"TIMETABLE_PLATFORM_{row.platform}")

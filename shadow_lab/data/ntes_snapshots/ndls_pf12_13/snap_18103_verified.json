@@ -1,0 +1,25 @@
+{
+  "site_id": "ndls_pf12_13",
+  "station_code": "NDLS",
+  "requested_at": "2026-10-14T12:03:00+05:30",
+  "fetched_at": "2026-10-14T12:03:00+05:30",
+  "window_hr": 2,
+  "available": true,
+  "from_cache": false,
+  "stale_fallback": false,
+  "snapshot_age_seconds_at_decision": 0.0,
+  "source": "archive",
+  "trains": [
+    {
+      "train_number": "18103",
+      "train_name": "JALLIANWALA B EXP",
+      "platform": "12",
+      "time_min": 720,
+      "time_raw": "12:00",
+      "is_originating": false,
+      "is_terminating": false,
+      "dep_min": 725
+    }
+  ],
+  "raw_hash": "hash_18103_verified_ntes"
+}

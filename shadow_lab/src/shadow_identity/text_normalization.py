@@ -107,31 +107,33 @@ def is_endpoint_text(text: str, extra_endpoints: Optional[Set[str]] = None) -> b
     return False
 
 
+GENERIC_NAME_TOKENS = {"EXP", "EXPRESS", "SF", "SUPERFAST", "SPL", "SPECIAL", "MAIL"}
+
+
+def meaningful_token_sets(q_norm: str, t_norm: str) -> Tuple[Set[str], Set[str]]:
+    q_tokens = set(q_norm.split())
+    t_tokens = set(t_norm.split())
+    q_core = q_tokens - GENERIC_NAME_TOKENS
+    t_core = t_tokens - GENERIC_NAME_TOKENS
+    return q_core, t_core
+
+
 def match_name_similarity(query_name: str, target_name: str) -> float:
-    """Token-based Jaccard / Overlap similarity between two train names."""
+    """Token-based Jaccard similarity between two train names with generic token stripping."""
     q_norm = normalize_train_name(query_name)
     t_norm = normalize_train_name(target_name)
     if not q_norm or not t_norm:
         return 0.0
-    if q_norm == t_norm or q_norm in t_norm or t_norm in q_norm:
+    if q_norm == t_norm:
         return 1.0
-    
-    q_tokens = set(q_norm.split())
-    t_tokens = set(t_norm.split())
-    
-    # Strip generic suffixes for token comparison
-    generic = {"EXP", "EXPRESS", "SF", "SUPERFAST", "SPL", "SPECIAL", "MAIL"}
-    q_core = q_tokens - generic
-    t_core = t_tokens - generic
-    
-    if q_core and t_core:
-        intersect = q_core.intersection(t_core)
-        union = q_core.union(t_core)
-        return len(intersect) / len(union)
-    
-    intersect = q_tokens.intersection(t_tokens)
-    union = q_tokens.union(t_tokens)
-    return len(intersect) / len(union) if union else 0.0
+
+    q_core, t_core = meaningful_token_sets(q_norm, t_norm)
+    if not q_core or not t_core:
+        return 0.0
+    if any(len(tok) < 4 for tok in q_core):
+        return 0.0  # short aliases can match ONLY if explicitly whitelisted in site aliases
+    score = len(q_core & t_core) / len(q_core | t_core)
+    return round(score, 4)
 
 
 def match_name_with_aliases(

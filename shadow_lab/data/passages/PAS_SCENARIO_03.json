@@ -293,30 +293,39 @@
       "train_number": "12560",
       "status": "PROVISIONAL",
       "reason_codes": [
+        "NAME_MATCH",
+        "NAME_RECOGNIZED_COACH_UNVERIFIED",
         "NTES_UNAVAILABLE_OR_TIMED_OUT",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
-        "VISUAL_COMPLEX_4_OR_6_NUMBER_BOARD",
-        "VISUAL_NAME_STRONG_CONSENSUS"
+        "SERVICE_FAMILY_MAPPING",
+        "SERVICE_FAMILY_MATCHED",
+        "VISUAL_COMPLEX_4_OR_6_NUMBER_BOARD"
       ]
     },
     "T1": {
       "train_number": "12560",
       "status": "PROVISIONAL",
       "reason_codes": [
+        "NAME_MATCH",
+        "NAME_RECOGNIZED_COACH_UNVERIFIED",
         "NTES_UNAVAILABLE_OR_TIMED_OUT",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
-        "VISUAL_COMPLEX_4_OR_6_NUMBER_BOARD",
-        "VISUAL_NAME_STRONG_CONSENSUS"
+        "SERVICE_FAMILY_MAPPING",
+        "SERVICE_FAMILY_MATCHED",
+        "VISUAL_COMPLEX_4_OR_6_NUMBER_BOARD"
       ]
     },
     "T2": {
       "train_number": "12560",
       "status": "PROVISIONAL",
       "reason_codes": [
+        "NAME_MATCH",
+        "NAME_RECOGNIZED_COACH_UNVERIFIED",
         "NTES_UNAVAILABLE_OR_TIMED_OUT",
         "PLATFORM_AMBIGUOUS_ISLAND_PRESERVED",
-        "VISUAL_COMPLEX_4_OR_6_NUMBER_BOARD",
-        "VISUAL_NAME_STRONG_CONSENSUS"
+        "SERVICE_FAMILY_MAPPING",
+        "SERVICE_FAMILY_MATCHED",
+        "VISUAL_COMPLEX_4_OR_6_NUMBER_BOARD"
       ],
       "post_fetch_kind": "UNAVAILABLE"
     }

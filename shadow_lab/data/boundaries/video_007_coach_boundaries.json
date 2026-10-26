@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "source": "SYNCHRONIZED_SENSOR",
+    "fixture_type": "SYNTHETIC_TEST_FIXTURE",
+    "site_id": "ndls_pf12_13",
+    "passage_id": "test_v007_pass",
+    "camera_id": "side_a",
+    "hardware_sync_verified": false,
+    "sync_method": "OPTICAL_BEAM_ESTIMATED",
+    "verified_at": "2026-10-14T12:00:00+05:30",
+    "notes": "Synthetic coach intervals fixture for offline regression testing. Real-world hardware synchronization is not established."
+  },
+  "coaches": [
+    {
+      "coach_id": "C01",
+      "start_frame": 297,
+      "end_frame": 303
+    },
+    {
+      "coach_id": "C02",
+      "start_frame": 447,
+      "end_frame": 453
+    },
+    {
+      "coach_id": "C03",
+      "start_frame": 747,
+      "end_frame": 753
+    },
+    {
+      "coach_id": "C04",
+      "start_frame": 897,
+      "end_frame": 903
+    },
+    {
+      "coach_id": "C05",
+      "start_frame": 1247,
+      "end_frame": 1253
+    },
+    {
+      "coach_id": "C06",
+      "start_frame": 3197,
+      "end_frame": 3203
+    }
+  ]
+}

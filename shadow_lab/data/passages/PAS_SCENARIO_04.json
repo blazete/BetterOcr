@@ -51,6 +51,15 @@
     "version": "2026-10-13-validated-v1",
     "candidate_services": [
       {
+        "train_number": "12920",
+        "train_name": "",
+        "score": 3.5,
+        "evidence_list": [
+          "VISUAL_NUMBER_PROVISIONAL"
+        ],
+        "contradictions": []
+      },
+      {
         "train_number": "12314",
         "train_name": "NDLS-SEALDAH RAJ",
         "score": 3.0,

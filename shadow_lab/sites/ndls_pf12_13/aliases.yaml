@@ -20,3 +20,19 @@ aliases:
     service_numbers: ["12451", "12452"]
     endpoints: ["NEW DELHI", "KANPUR CENTRAL"]
     variations: ["NDLS-CNB SHRAM SHKTI", "SHRAM SHAKTI EXP"]
+  "UTTAR SAMPARK KRANTI":
+    canonical_name: "UTTAR SAMPARK KRANTI"
+    service_numbers: ["12445", "12446"]
+    endpoints: ["NEW DELHI", "SHRI MATA VAISHNO DEVI KATRA", "SVDK"]
+    variations: ["UTTAR SAMPARK KRANTI", "UTTAR SAMPRK KRANTI", "UTTAR S KRANTI", "UTTAR SAMPARK KRAN", "NDLS-SVDK UTTAR SAMPARK KRANTI"]
+  "SACHKHAND EXPRESS":
+    canonical_name: "SACHKHAND EXPRESS"
+    service_numbers: ["12715", "12716"]
+    endpoints: ["NED", "ASR", "NANDED", "AMRITSAR"]
+    variations: ["SACHKHAND EXPRESS", "SACHKHAND EXP", "SACHKHAND"]
+  "MALWA EXPRESS":
+    canonical_name: "MALWA EXPRESS"
+    service_numbers: ["12919", "12920"]
+    endpoints: ["INDORE", "KATRA", "SVDK", "DADN"]
+    variations: ["MALWA EXPRESS", "MALWA EXP"]
+

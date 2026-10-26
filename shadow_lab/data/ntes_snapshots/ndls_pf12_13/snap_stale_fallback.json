@@ -1,0 +1,1 @@
+{"site_id": "ndls_pf12_13", "station_code": "NDLS", "requested_at": "2026-10-14T12:10:00+05:30", "fetched_at": "2026-10-14T12:10:00+05:30", "available": true, "stale_fallback": true, "trains": [{"train_number": "18103", "train_name": "ASR EXP", "platform": "12"}]}

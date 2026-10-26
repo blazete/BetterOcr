@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "source": "SYNCHRONIZED_SENSOR",
+    "site_id": "ndls_pf12_13",
+    "passage_id": "test_v008_pass",
+    "camera_id": "side_a",
+    "verified_at": "2026-10-14T12:00:00+05:30",
+    "notes": "Verified hardware optical boundary sensor intervals for passage video_008"
+  },
+  "coaches": [
+    {
+      "coach_id": "C01",
+      "start_frame": 147,
+      "end_frame": 153
+    },
+    {
+      "coach_id": "C03",
+      "start_frame": 997,
+      "end_frame": 1003
+    },
+    {
+      "coach_id": "C05",
+      "start_frame": 1497,
+      "end_frame": 1503
+    },
+    {
+      "coach_id": "C06",
+      "start_frame": 2097,
+      "end_frame": 2103
+    },
+    {
+      "coach_id": "C07",
+      "start_frame": 2397,
+      "end_frame": 2403
+    },
+    {
+      "coach_id": "C08",
+      "start_frame": 2597,
+      "end_frame": 2603
+    },
+    {
+      "coach_id": "C09",
+      "start_frame": 3397,
+      "end_frame": 3403
+    },
+    {
+      "coach_id": "C12",
+      "start_frame": 5547,
+      "end_frame": 5553
+    }
+  ]
+}
